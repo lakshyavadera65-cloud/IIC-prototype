@@ -73,6 +73,80 @@ export interface ScheduleSlot {
   status: 'scheduled' | 'clash' | 'delayed' | 'rerouted' | 'completed';
 }
 
+export type RootCauseCategory =
+  | 'equipment_failure'
+  | 'human_error'
+  | 'process_quality'
+  | 'supply_chain'
+  | 'it_software';
+
+export interface RootCauseBenchmark {
+  category: RootCauseCategory;
+  label: string;
+  share_pct: string;
+  stoppage_share: string;
+  early_signature: string;
+  color_class: string;
+  bg_class: string;
+  border_class: string;
+}
+
+export const ROOT_CAUSE_BENCHMARKS: Record<RootCauseCategory, RootCauseBenchmark> = {
+  equipment_failure: {
+    category: 'equipment_failure',
+    label: 'Equipment Failure',
+    share_pct: '42–45%',
+    stoppage_share: '~80% of factory stoppages trace back to mechanical & electrical components (bearings, motors, hydraulics, drives).',
+    early_signature: '~80% exhibit detectable early signatures (vibration, thermal rise, ultrasonic wear) weeks prior to failure.',
+    color_class: 'text-rose-400',
+    bg_class: 'bg-rose-950/40',
+    border_class: 'border-rose-700/60',
+  },
+  human_error: {
+    category: 'human_error',
+    label: 'Human Error',
+    share_pct: '~23%',
+    stoppage_share: 'Operator misconfiguration, skipped procedure checklist, bad startup/shutdown sequence, manual override errors.',
+    early_signature: 'Most frequent around shift handoffs, expedited schedule changes, and unverified tooling setups.',
+    color_class: 'text-amber-400',
+    bg_class: 'bg-amber-950/40',
+    border_class: 'border-amber-700/60',
+  },
+  process_quality: {
+    category: 'process_quality',
+    label: 'Process / Quality Deviation',
+    share_pct: '~15%',
+    stoppage_share: 'Raw material batch variation, progressive tooling wear, thermal tolerance drift, scrap spike shutdowns.',
+    early_signature: 'Detectable via in-line CMM inspection, SPC control limit alerts, and surface roughness degradation.',
+    color_class: 'text-yellow-400',
+    bg_class: 'bg-yellow-950/40',
+    border_class: 'border-yellow-700/60',
+  },
+  supply_chain: {
+    category: 'supply_chain',
+    label: 'Supply Chain & Logistics',
+    share_pct: '~12%',
+    stoppage_share: 'Missing raw materials, supplier delivery delays, freight carrier hold-ups, inventory stockouts.',
+    early_signature: 'Detectable via supplier ASN tracking, carrier milestone telemetry, and safety buffer burn rates.',
+    color_class: 'text-blue-400',
+    bg_class: 'bg-blue-950/40',
+    border_class: 'border-blue-700/60',
+  },
+  it_software: {
+    category: 'it_software',
+    label: 'IT / Software / Network',
+    share_pct: '~8% (Rapidly Growing)',
+    stoppage_share: 'MES/ERP database sync failures, shop-floor sensor telemetry packet drops, SCADA timeouts, stale dispatch data.',
+    early_signature: 'Detectable via heartbeat latency anomalies, database replication lag, and telemetry drop spikes.',
+    color_class: 'text-purple-400',
+    bg_class: 'bg-purple-950/40',
+    border_class: 'border-purple-700/60',
+  },
+};
+
+export const INDUSTRY_GLOBAL_BENCHMARK =
+  '500 largest global manufacturers lose ~$1.4T/year to unplanned downtime (~11% of revenue); average factory loses ~800 hours/year to preventable breakdowns.';
+
 export interface DisruptionEvent {
   id: string;
   type: string;
@@ -82,7 +156,10 @@ export interface DisruptionEvent {
   severity: 'critical' | 'high' | 'medium' | 'low';
   description: string;
   source_text: string;
+  root_cause_category?: RootCauseCategory;
+  root_cause_benchmark?: RootCauseBenchmark;
 }
+
 
 export interface RippleNode {
   id: string;
@@ -188,6 +265,7 @@ export interface FactoryState {
     timestamp: string;
     severity: string;
     message: string;
+    root_cause_category?: string;
   }>;
 }
 

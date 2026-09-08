@@ -32,18 +32,24 @@ def create_event(payload: Union[EventCreateRequest, Dict[str, Any]]):
 
 @router.post("/demo/trigger/{scenario_id}")
 def trigger_demo_scenario(scenario_id: str):
-    """Trigger predefined demo scenarios such as 'scenario-a' (CNC-02 gearbox failure)."""
+    """Trigger predefined demo scenarios grounded in real-world downtime categories."""
     normalized_id = scenario_id.lower().replace("_", "-")
 
+    # Reset to clean state first so demo is clean and repeatable
+    factory_state.reset()
+
     if normalized_id in ("scenario-a", "a", "cnc-02-failure"):
-        # Reset to clean state first so demo is repeatable
-        factory_state.reset()
-        result = orchestrator.trigger_scenario_a()
-        return result
+        return orchestrator.trigger_scenario_a()
+    elif normalized_id in ("scenario-b", "b", "aluminum-delay", "supplier-delay"):
+        return orchestrator.trigger_scenario_b()
+    elif normalized_id in ("scenario-c", "c", "fastener-shortage", "material-shortage"):
+        return orchestrator.trigger_scenario_c()
+    elif normalized_id in ("scenario-d", "d", "mes-sync-failure", "it-software"):
+        return orchestrator.trigger_scenario_d()
     else:
         raise HTTPException(
             status_code=404,
-            detail=f"Scenario '{scenario_id}' not found. Supported scenarios: 'scenario-a'"
+            detail=f"Scenario '{scenario_id}' not found. Supported scenarios: 'scenario-a', 'scenario-b', 'scenario-c', 'scenario-d'"
         )
 
 

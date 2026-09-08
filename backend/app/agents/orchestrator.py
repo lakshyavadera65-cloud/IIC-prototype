@@ -129,7 +129,7 @@ class AgentOrchestrator:
         return result_payload
 
     def trigger_scenario_a(self) -> Dict[str, Any]:
-        """Trigger predefined Scenario A: CNC-02 Gearbox Failure."""
+        """Trigger predefined Scenario A: CNC-02 Gearbox Failure (Equipment Failure ~45%)."""
         raw_message = "URGENT MACHINE ALERT: CNC-02 gearbox vibration exceeded safe operating limits. Machine shut down automatically. Estimated repair time: 6 hours."
         return self.process_event({
             "event_id": "EVT-001",
@@ -137,6 +137,70 @@ class AgentOrchestrator:
             "entity_id": "CNC-02",
             "duration_hours": 6.0,
             "severity": "critical",
+            "root_cause_category": "equipment_failure",
             "source": "sentinel",
-            "details": {"raw_message": raw_message, "failure_mode": "gearbox vibration"}
+            "details": {
+                "raw_message": raw_message,
+                "failure_mode": "gearbox vibration",
+                "root_cause_category": "equipment_failure",
+                "benchmark_note": "Equipment failure accounts for 42-45% of unplanned downtime; 80% exhibit early vibration signatures."
+            }
         })
+
+    def trigger_scenario_b(self) -> Dict[str, Any]:
+        """Trigger predefined Scenario B: Aluminum Alloy Shipment Delay (Supply Chain ~12%)."""
+        raw_message = "SUPPLIER DELAY: Inbound shipment of aluminum alloy M-AL delayed by 24 hours due to freight carrier disruption."
+        return self.process_event({
+            "event_id": "EVT-002",
+            "event_type": "supplier_delay",
+            "entity_id": "M-AL",
+            "duration_hours": 24.0,
+            "severity": "high",
+            "root_cause_category": "supply_chain",
+            "source": "sentinel",
+            "details": {
+                "raw_message": raw_message,
+                "material": "M-AL",
+                "root_cause_category": "supply_chain",
+                "benchmark_note": "Supply chain disruptions cause ~12% of manufacturing delays."
+            }
+        })
+
+    def trigger_scenario_c(self) -> Dict[str, Any]:
+        """Trigger predefined Scenario C: Fastener Inventory Stockout (Supply Chain / Process Quality ~12%)."""
+        raw_message = "MATERIAL SHORTAGE: Precision Fasteners M-FAST dropped below safety buffer threshold. Remaining stock insufficient for scheduled shift."
+        return self.process_event({
+            "event_id": "EVT-003",
+            "event_type": "material_shortage",
+            "entity_id": "M-FAST",
+            "duration_hours": 12.0,
+            "severity": "medium",
+            "root_cause_category": "supply_chain",
+            "source": "sentinel",
+            "details": {
+                "raw_message": raw_message,
+                "material": "M-FAST",
+                "root_cause_category": "supply_chain",
+                "benchmark_note": "Inventory shortages trigger secondary starvation cascades across downstream assembly stations."
+            }
+        })
+
+    def trigger_scenario_d(self) -> Dict[str, Any]:
+        """Trigger predefined Scenario D: MES Data Pipeline Sync Failure (IT / Software ~8%)."""
+        raw_message = "CRITICAL IT ALERT: MES database synchronization failure on Assembly Line A (ASM-A). Automated workorder dispatch halted for 4 hours due to corrupted inventory telemetry."
+        return self.process_event({
+            "event_id": "EVT-004",
+            "event_type": "machine_failure",
+            "entity_id": "ASM-A",
+            "duration_hours": 4.0,
+            "severity": "high",
+            "root_cause_category": "it_software",
+            "source": "sentinel",
+            "details": {
+                "raw_message": raw_message,
+                "failure_mode": "MES software sync outage",
+                "root_cause_category": "it_software",
+                "benchmark_note": "IT & software outages account for ~8% of downtime and represent the fastest-growing source of factory stoppages."
+            }
+        })
+

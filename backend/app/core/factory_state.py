@@ -185,6 +185,7 @@ class FactoryState:
             "alert_id": f"ALT-{len(self.alerts) + 1:03d}",
             "event_id": event_id,
             "severity": event_data.get("severity", "medium"),
+            "root_cause_category": event_data.get("root_cause_category", "equipment_failure"),
             "title": f"Incident on {event_data.get('entity_id')}",
             "message": f"{event_data.get('event_type').replace('_', ' ').title()}: duration {event_data.get('duration_hours', 0)}h",
             "timestamp": datetime.utcnow().isoformat(),

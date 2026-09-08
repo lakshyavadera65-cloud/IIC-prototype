@@ -1,4 +1,4 @@
-annotated-doc==0.0.5
+﻿annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.15.1
 click==8.5.0
@@ -10,14 +10,12 @@ lance-namespace==0.8.6
 lance-namespace-urllib3-client==0.8.6
 networkx==3.6.1
 numpy==2.5.3
-openpyxl==3.1.5
 pyarrow==25.0.1
 pydantic==2.13.5
 pydantic_core==2.46.5
 pylance==11.0.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.3
-python-multipart==0.0.32
 PyYAML==6.0.3
 six==1.17.0
 starlette==1.6.0

@@ -1,7 +1,7 @@
 import re
 from typing import Dict, Any, Union
 from datetime import datetime
-from app.models.events import FactoryEvent
+from app.models.events import FactoryEvent, ROOT_CAUSE_BENCHMARKS
 
 
 class SentinelAgent:
@@ -11,20 +11,33 @@ class SentinelAgent:
         self.factory_state = factory_state
 
     def parse_event(self, raw_input: Union[str, Dict[str, Any]], event_id: str = None) -> Dict[str, Any]:
-        """Deterministic rule-based parser for raw alert messages or direct dicts."""
+        """Deterministic rule-based parser for raw alert messages or direct dicts with root cause categorization."""
         if not event_id:
             event_id = f"EVT-{datetime.utcnow().strftime('%M%S')}"
 
         if isinstance(raw_input, dict):
             # Already structured input
+            event_type = raw_input.get("event_type", "machine_failure")
+            category = raw_input.get("root_cause_category")
+            if not category:
+                if event_type in ("supplier_delay", "material_shortage"):
+                    category = "supply_chain"
+                else:
+                    category = "equipment_failure"
+
+            details = raw_input.get("details", {})
+            if "benchmark" not in details:
+                details["benchmark"] = ROOT_CAUSE_BENCHMARKS.get(category, {})
+
             return FactoryEvent(
                 event_id=raw_input.get("event_id", event_id),
-                event_type=raw_input.get("event_type", "machine_failure"),
+                event_type=event_type,
                 entity_id=raw_input.get("entity_id", "CNC-02"),
                 duration_hours=float(raw_input.get("duration_hours", 6.0)),
                 severity=raw_input.get("severity", "critical"),
+                root_cause_category=category,
                 source=raw_input.get("source", "sentinel"),
-                details=raw_input.get("details", {})
+                details=details
             ).model_dump()
 
         text = str(raw_input).strip()
@@ -74,14 +87,34 @@ class SentinelAgent:
             event_type = "machine_failure"
             entity_id = machine_match.group(1).upper() if machine_match else "CNC-02"
 
+        # 7. Classify Root Cause Category (Real-World Manufacturing Taxonomy)
+        if any(w in lower for w in ["mes", "sync", "software", "network", "server", "telemetry", "scada", "pipeline", "database", "packet loss"]):
+            root_cause_category = "it_software"
+        elif any(w in lower for w in ["human error", "operator", "misconfig", "misconfiguration", "skipped", "procedure", "manual override", "wrong tool", "bad startup", "startup error"]):
+            root_cause_category = "human_error"
+        elif any(w in lower for w in ["tooling wear", "wear", "tolerance", "quality deviation", "spc", "scrap", "defect", "inspection", "surface roughness", "material variation"]):
+            root_cause_category = "process_quality"
+        elif event_type in ("supplier_delay", "material_shortage") or any(w in lower for w in ["supplier", "shipment", "delivery", "vendor", "shortage", "freight", "logistics"]):
+            root_cause_category = "supply_chain"
+        else:
+            root_cause_category = "equipment_failure"
+
+        benchmark_info = ROOT_CAUSE_BENCHMARKS.get(root_cause_category, {})
+
         event = FactoryEvent(
             event_id=event_id,
             event_type=event_type,
             entity_id=entity_id,
             duration_hours=duration_hours,
             severity=severity,
+            root_cause_category=root_cause_category,
             source="sentinel",
-            details={"raw_message": text}
+            details={
+                "raw_message": text,
+                "benchmark": benchmark_info,
+                "root_cause_category": root_cause_category
+            }
         )
 
         return event.model_dump()
+

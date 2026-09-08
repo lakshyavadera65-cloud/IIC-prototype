@@ -117,9 +117,14 @@ export async function triggerDisruption(text: string, scenarioId?: string): Prom
 
   let backendResult: any;
 
-  if (isScenarioA) {
-    // Call dedicated Scenario A demo trigger endpoint
+  if (scenarioId === 'SCENARIO_A' || scenarioId?.toLowerCase().includes('scenario-a')) {
     backendResult = await request<any>('/api/demo/trigger/scenario-a', { method: 'POST' });
+  } else if (scenarioId === 'SCENARIO_B' || scenarioId?.toLowerCase().includes('scenario-b')) {
+    backendResult = await request<any>('/api/demo/trigger/scenario-b', { method: 'POST' });
+  } else if (scenarioId === 'SCENARIO_C' || scenarioId?.toLowerCase().includes('scenario-c')) {
+    backendResult = await request<any>('/api/demo/trigger/scenario-c', { method: 'POST' });
+  } else if (scenarioId === 'SCENARIO_D' || scenarioId?.toLowerCase().includes('scenario-d')) {
+    backendResult = await request<any>('/api/demo/trigger/scenario-d', { method: 'POST' });
   } else {
     // Call generic event ingestion endpoint with raw message
     backendResult = await request<any>('/api/events', {

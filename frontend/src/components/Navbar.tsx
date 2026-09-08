@@ -1,6 +1,6 @@
 import React from 'react';
-import { Activity, RefreshCw, MessageSquare, ShieldAlert, Cpu, CheckCircle2, LogOut, UserCheck } from 'lucide-react';
-import { FactoryState } from '../types';
+import { Activity, RefreshCw, MessageSquare, ShieldAlert, Cpu, CheckCircle2, LogOut, UserCheck, Info } from 'lucide-react';
+import { FactoryState, INDUSTRY_GLOBAL_BENCHMARK } from '../types';
 import { UserProfile } from './LoginPage';
 
 interface NavbarProps {
@@ -58,10 +58,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Center: System Telemetry & Health */}
         <div className="flex items-center gap-4 sm:gap-6">
-          {/* Health Score Gauge */}
-          <div className="flex items-center gap-2.5">
+          {/* Health Score Gauge with Industry Benchmark Reference */}
+          <div className="relative group flex items-center gap-2.5 cursor-help">
             <div className="text-right hidden sm:block">
-              <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Factory Health</div>
+              <div className="flex items-center justify-end gap-1 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+                <span>Factory Health</span>
+                <Info className="h-3 w-3 text-cyan-400 opacity-70 group-hover:opacity-100 transition" />
+              </div>
               <div className="text-xs text-slate-300 font-medium">
                 {healthScore >= 90 ? 'Nominal Operations' : healthScore >= 70 ? 'Degraded State' : 'Critical Disruption'}
               </div>
@@ -72,6 +75,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${healthScore >= 90 ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
               </span>
               <span className="text-base font-black tracking-tight">{healthScore.toFixed(1)}%</span>
+            </div>
+
+            {/* Hover Tooltip: Global Industry Benchmark Reference */}
+            <div className="absolute top-full right-0 mt-2 w-80 p-3 bg-slate-900/95 backdrop-blur-md rounded-xl border border-cyan-500/40 shadow-2xl text-left hidden group-hover:block z-50 pointer-events-none transition-all duration-200">
+              <div className="flex items-center gap-1.5 text-cyan-400 font-bold text-[11px] uppercase tracking-wider mb-1">
+                <Info className="h-3.5 w-3.5 shrink-0" />
+                <span>Global Manufacturing Benchmark</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed font-normal">
+                "{INDUSTRY_GLOBAL_BENCHMARK}"
+              </p>
+              <div className="mt-2 pt-2 border-t border-slate-800 text-[10px] text-slate-400 flex justify-between font-mono">
+                <span>Downtime: ~11% Revenue</span>
+                <span>Avg Loss: ~800 hrs/yr</span>
+              </div>
             </div>
           </div>
 

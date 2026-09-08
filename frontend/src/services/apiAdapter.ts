@@ -11,6 +11,8 @@ import {
   FactoryState,
   RippleNode,
   RippleEdge,
+  RootCauseCategory,
+  ROOT_CAUSE_BENCHMARKS,
 } from '../types';
 
 const CUSTOMER_MAP: Record<string, string> = {
@@ -158,15 +160,24 @@ export function buildRippleGraph(event: any, impact: any): { nodes: RippleNode[]
   const entityId = event?.entity_id || 'CNC-02';
   const affectedOrders: string[] = impact?.affected_order_ids || ['ORD-103', 'ORD-104'];
   const downstream: any[] = impact?.downstream_impact || [];
+  const category = (event?.root_cause_category || 'equipment_failure') as RootCauseCategory;
+  const benchmark = ROOT_CAUSE_BENCHMARKS[category] || ROOT_CAUSE_BENCHMARKS.equipment_failure;
 
   const nodes: RippleNode[] = [
     // Tier 1: Disruption Source
     {
       id: 'node-source',
-      label: `${entityId} Gearbox Failure (6h)`,
+      label: `${entityId} • ${benchmark.label} (${benchmark.share_pct})`,
       type: 'source',
       status: 'critical',
-      details: { cause: 'Mechanical vibration limits exceeded', severity: 'Critical' },
+      details: {
+        cause: event?.details?.raw_message || `${entityId} stoppage (${event?.duration_hours || 6}h)`,
+        category: benchmark.label,
+        downtime_share: benchmark.share_pct,
+        stoppage_share: benchmark.stoppage_share,
+        early_signature: benchmark.early_signature,
+        severity: event?.severity || 'Critical'
+      },
     },
     // Tier 2: Failed Machine
     {
@@ -269,6 +280,9 @@ export function adaptBackendPipelineToFrontend(backendResult: any): PipelineResu
 
   const { nodes: ripple_nodes, edges: ripple_edges } = buildRippleGraph(event, impact);
 
+  const rawCategory = (event.root_cause_category || 'equipment_failure') as RootCauseCategory;
+  const benchmark = ROOT_CAUSE_BENCHMARKS[rawCategory] || ROOT_CAUSE_BENCHMARKS.equipment_failure;
+
   // 1. Disruption Event
   const disruptionEvent: DisruptionEvent = {
     id: event.event_id || 'EVT-001',
@@ -279,6 +293,8 @@ export function adaptBackendPipelineToFrontend(backendResult: any): PipelineResu
     severity: (event.severity || 'critical').toLowerCase() as DisruptionEvent['severity'],
     description: event.details?.raw_message || `${event.entity_id} failure (${event.duration_hours}h downtime)`,
     source_text: event.details?.raw_message || `URGENT: ${event.entity_id} gearbox vibration exceeded limits. Estimated downtime: ${event.duration_hours} hours.`,
+    root_cause_category: rawCategory,
+    root_cause_benchmark: benchmark,
   };
 
   // 2. Impact Report
@@ -386,16 +402,22 @@ export function adaptBackendStateToFrontend(
 
   const pulseScore = backendPulse?.pulse_score ?? backendState?.pulse?.pulse_score ?? 94.0;
 
-  const activeDisruptions: DisruptionEvent[] = activeEvents.map((e: any) => ({
-    id: e.event_id || 'EVT-001',
-    type: e.event_type || 'machine_failure',
-    entity: e.entity_id || 'CNC-02',
-    duration_hours: e.duration_hours || 6.0,
-    quantity_impact: 180,
-    severity: (e.severity || 'critical').toLowerCase() as DisruptionEvent['severity'],
-    description: e.details?.raw_message || `${e.entity_id} Disruption`,
-    source_text: e.details?.raw_message || `${e.entity_id} shutdown`,
-  }));
+  const activeDisruptions: DisruptionEvent[] = activeEvents.map((e: any) => {
+    const cat = (e.root_cause_category || 'equipment_failure') as RootCauseCategory;
+    const bench = ROOT_CAUSE_BENCHMARKS[cat] || ROOT_CAUSE_BENCHMARKS.equipment_failure;
+    return {
+      id: e.event_id || 'EVT-001',
+      type: e.event_type || 'machine_failure',
+      entity: e.entity_id || 'CNC-02',
+      duration_hours: e.duration_hours || 6.0,
+      quantity_impact: 180,
+      severity: (e.severity || 'critical').toLowerCase() as DisruptionEvent['severity'],
+      description: e.details?.raw_message || `${e.entity_id} Disruption`,
+      source_text: e.details?.raw_message || `${e.entity_id} shutdown`,
+      root_cause_category: cat,
+      root_cause_benchmark: bench,
+    };
+  });
 
   const adaptedSchedule = adaptSchedule(schedule, offlineMachineIds, activeEvents);
 
@@ -420,6 +442,7 @@ export function adaptBackendStateToFrontend(
       timestamp: a.timestamp || 'Just now',
       severity: a.severity || 'critical',
       message: a.message || a.title || 'Factory Incident Alert',
+      root_cause_category: a.root_cause_category || 'equipment_failure',
     })),
   };
 }

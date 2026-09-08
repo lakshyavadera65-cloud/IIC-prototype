@@ -25,9 +25,9 @@ def run_test():
     sentinel = SentinelAgent(factory_state)
 
     # -----------------------------------------------------------------
-    # TEST 1: SENTINEL RULE-BASED PARSING
+    # TEST 1: SENTINEL RULE-BASED PARSING & ROOT CAUSE CATEGORIZATION
     # -----------------------------------------------------------------
-    print("--- [TEST 1] Testing Sentinel Agent Rule-Based Parsing ---")
+    print("--- [TEST 1] Testing Sentinel Agent Rule-Based Parsing & Root Cause Taxonomy ---")
     raw_alert = "URGENT MACHINE ALERT: CNC-02 gearbox vibration exceeded safe operating limits. Machine shut down automatically. Estimated repair time: 6 hours."
     parsed = sentinel.parse_event(raw_alert, event_id="EVT-001")
     assert parsed["event_id"] == "EVT-001", "Event ID mismatch"
@@ -35,20 +35,33 @@ def run_test():
     assert parsed["entity_id"] == "CNC-02", f"Expected CNC-02, got {parsed['entity_id']}"
     assert parsed["duration_hours"] == 6.0, f"Expected 6.0 hours, got {parsed['duration_hours']}"
     assert parsed["severity"] == "critical", f"Expected critical, got {parsed['severity']}"
-    print(f"  [OK] Machine failure parsed successfully: {parsed['entity_id']} ({parsed['duration_hours']}h, {parsed['severity']})")
+    assert parsed["root_cause_category"] == "equipment_failure", f"Expected equipment_failure, got {parsed.get('root_cause_category')}"
+    print(f"  [OK] Machine failure parsed successfully: {parsed['entity_id']} ({parsed['duration_hours']}h, {parsed['severity']}, category={parsed['root_cause_category']})")
 
     supplier_alert = "SUPPLIER DELAY: Shipment of M-AL from MetalCore Supplies delayed by 24 hours."
     parsed_sup = sentinel.parse_event(supplier_alert)
     assert parsed_sup["event_type"] == "supplier_delay"
     assert parsed_sup["entity_id"] == "M-AL"
-    print(f"  [OK] Supplier delay parsed successfully: {parsed_sup['entity_id']} ({parsed_sup['duration_hours']}h)")
+    assert parsed_sup["root_cause_category"] == "supply_chain", f"Expected supply_chain, got {parsed_sup.get('root_cause_category')}"
+    print(f"  [OK] Supplier delay parsed successfully: {parsed_sup['entity_id']} ({parsed_sup['duration_hours']}h, category={parsed_sup['root_cause_category']})")
 
     shortage_alert = "MATERIAL SHORTAGE: Precision Seals M-SEAL below safety stock limit."
     parsed_mat = sentinel.parse_event(shortage_alert)
     assert parsed_mat["event_type"] == "material_shortage"
     assert parsed_mat["entity_id"] == "M-SEAL"
-    print(f"  [OK] Material shortage parsed successfully: {parsed_mat['entity_id']}")
-    print("  [OK] All Sentinel tests passed!\n")
+    assert parsed_mat["root_cause_category"] == "supply_chain"
+    print(f"  [OK] Material shortage parsed successfully: {parsed_mat['entity_id']} (category={parsed_mat['root_cause_category']})")
+
+    it_alert = "CRITICAL IT ALERT: MES database synchronization failure on Assembly Line A (ASM-A). Automated dispatch halted for 4 hours."
+    parsed_it = sentinel.parse_event(it_alert)
+    assert parsed_it["root_cause_category"] == "it_software", f"Expected it_software, got {parsed_it.get('root_cause_category')}"
+    print(f"  [OK] IT/Software failure parsed successfully: category={parsed_it['root_cause_category']}")
+
+    human_alert = "OPERATOR ERROR: Setup parameter misconfiguration on FIN-01 by operator caused surface roughness defect."
+    parsed_human = sentinel.parse_event(human_alert)
+    assert parsed_human["root_cause_category"] == "human_error", f"Expected human_error, got {parsed_human.get('root_cause_category')}"
+    print(f"  [OK] Human error parsed successfully: category={parsed_human['root_cause_category']}")
+    print("  [OK] All Sentinel tests and root cause categorizations passed!\n")
 
     # -----------------------------------------------------------------
     # TEST 2: BASELINE HEALTHY FACTORY PULSE
@@ -69,6 +82,8 @@ def run_test():
     pipeline_result = orchestrator.trigger_scenario_a()
 
     assert pipeline_result["event_id"] == "EVT-001"
+    assert pipeline_result["event"]["root_cause_category"] == "equipment_failure", f"Expected equipment_failure, got {pipeline_result['event'].get('root_cause_category')}"
+    print(f"  * Root Cause Category: {pipeline_result['event']['root_cause_category']}")
     print("  * Agent Execution Logs:")
     for log in pipeline_result["agent_logs"]:
         print(f"    [{log['agent']}] ({log['status']}): {log['message']}")
@@ -181,8 +196,33 @@ def run_test():
         else:
             assert resp.answer != "I don't have enough factory data to answer that.", "Valid factory question should have grounded answer"
 
-    print("\n  [OK] Grounded chat answered all factory questions correctly without hallucinating!")
-    print("\n=================================================================")
+    print("\n  [OK] Grounded chat answered all factory questions correctly without hallucinating!\n")
+
+    # -----------------------------------------------------------------
+    # TEST 10: MULTI-CATEGORY SCENARIO COVERAGE (B, C, D)
+    # -----------------------------------------------------------------
+    print("--- [TEST 10] Verifying Scenarios B, C, and D Real-World Categories ---")
+    
+    # Scenario B: Supplier Delay
+    factory_state.reset()
+    res_b = orchestrator.trigger_scenario_b()
+    assert res_b["event"]["root_cause_category"] == "supply_chain", f"Expected supply_chain for Scenario B, got {res_b['event'].get('root_cause_category')}"
+    print(f"  * Scenario B: {res_b['event']['entity_id']} -> category={res_b['event']['root_cause_category']} (~12% share)")
+
+    # Scenario C: Material Shortage
+    factory_state.reset()
+    res_c = orchestrator.trigger_scenario_c()
+    assert res_c["event"]["root_cause_category"] == "supply_chain", f"Expected supply_chain for Scenario C, got {res_c['event'].get('root_cause_category')}"
+    print(f"  * Scenario C: {res_c['event']['entity_id']} -> category={res_c['event']['root_cause_category']} (~12% share)")
+
+    # Scenario D: IT / Software Failure
+    factory_state.reset()
+    res_d = orchestrator.trigger_scenario_d()
+    assert res_d["event"]["root_cause_category"] == "it_software", f"Expected it_software for Scenario D, got {res_d['event'].get('root_cause_category')}"
+    print(f"  * Scenario D: {res_d['event']['entity_id']} -> category={res_d['event']['root_cause_category']} (~8% share)")
+    print("  [OK] All 4 real-world categories successfully tested across Scenarios A, B, C, D!\n")
+
+    print("=================================================================")
     print("ALL TESTS PASSED SUCCESSFULLY! FULL PIPELINE READY FOR DEMO.")
     print("=================================================================")
 
