@@ -8,14 +8,30 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-charts': ['recharts'],
-          'vendor-flow': ['@xyflow/react'],
-          'vendor-icons': ['lucide-react'],
+        manualChunks(id: string) {
+          if (id.includes('node_modules')) {
+            const normalizedId = id.replace(/\\/g, '/')
+            if (normalizedId.includes('/react/') || normalizedId.includes('/react-dom/')) {
+              return 'vendor-react'
+            }
+            if (normalizedId.includes('/recharts/')) {
+              return 'vendor-charts'
+            }
+            if (
+              normalizedId.includes('/@xyflow/') ||
+              normalizedId.includes('/reactflow/') ||
+              normalizedId.includes('react-flow')
+            ) {
+              return 'vendor-flow'
+            }
+            if (normalizedId.includes('/lucide-react/')) {
+              return 'vendor-icons'
+            }
+          }
         },
       },
     },
   },
 })
+
 
