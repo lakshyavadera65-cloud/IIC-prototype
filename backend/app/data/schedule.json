@@ -1,0 +1,155 @@
+[
+    {
+        "id": "SCH-001",
+        "resource_id": "CNC-01",
+        "order_id": "ORD-101",
+        "operation": "CNC_MACHINING",
+        "start_hour": 0,
+        "end_hour": 4,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-002",
+        "resource_id": "CNC-02",
+        "order_id": "ORD-103",
+        "operation": "CNC_MACHINING",
+        "start_hour": 0,
+        "end_hour": 4,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-003",
+        "resource_id": "FIN-01",
+        "order_id": "ORD-102",
+        "operation": "SURFACE_FINISHING",
+        "start_hour": 0,
+        "end_hour": 4,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-004",
+        "resource_id": "ASM-A",
+        "order_id": "ORD-102",
+        "operation": "ASSEMBLY",
+        "start_hour": 0,
+        "end_hour": 4,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-005",
+        "resource_id": "ASM-B",
+        "order_id": "ORD-104",
+        "operation": "ASSEMBLY",
+        "start_hour": 0,
+        "end_hour": 4,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-006",
+        "resource_id": "QC-01",
+        "order_id": "ORD-101",
+        "operation": "QUALITY_CONTROL",
+        "start_hour": 0,
+        "end_hour": 4,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-007",
+        "resource_id": "PK-01",
+        "order_id": "ORD-101",
+        "operation": "PACKAGING",
+        "start_hour": 0,
+        "end_hour": 4,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-008",
+        "resource_id": "CNC-01",
+        "order_id": "ORD-102",
+        "operation": "CNC_MACHINING",
+        "start_hour": 4,
+        "end_hour": 8,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-009",
+        "resource_id": "CNC-02",
+        "order_id": "ORD-103",
+        "operation": "CNC_MACHINING",
+        "start_hour": 4,
+        "end_hour": 8,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-010",
+        "resource_id": "FIN-01",
+        "order_id": "ORD-103",
+        "operation": "SURFACE_FINISHING",
+        "start_hour": 4,
+        "end_hour": 8,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-011",
+        "resource_id": "ASM-A",
+        "order_id": "ORD-101",
+        "operation": "ASSEMBLY",
+        "start_hour": 4,
+        "end_hour": 8,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-012",
+        "resource_id": "ASM-B",
+        "order_id": "ORD-104",
+        "operation": "ASSEMBLY",
+        "start_hour": 4,
+        "end_hour": 8,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-013",
+        "resource_id": "CNC-01",
+        "order_id": "ORD-105",
+        "operation": "CNC_MACHINING",
+        "start_hour": 8,
+        "end_hour": 12,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-014",
+        "resource_id": "CNC-02",
+        "order_id": "ORD-104",
+        "operation": "CNC_MACHINING",
+        "start_hour": 8,
+        "end_hour": 12,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-015",
+        "resource_id": "FIN-01",
+        "order_id": "ORD-104",
+        "operation": "SURFACE_FINISHING",
+        "start_hour": 8,
+        "end_hour": 12,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-016",
+        "resource_id": "ASM-A",
+        "order_id": "ORD-105",
+        "operation": "ASSEMBLY",
+        "start_hour": 8,
+        "end_hour": 12,
+        "status": "scheduled"
+    },
+    {
+        "id": "SCH-017",
+        "resource_id": "ASM-B",
+        "order_id": "ORD-103",
+        "operation": "ASSEMBLY",
+        "start_hour": 8,
+        "end_hour": 12,
+        "status": "scheduled"
+    }
+]

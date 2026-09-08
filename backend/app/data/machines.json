@@ -1,0 +1,94 @@
+[
+    {
+        "id": "CNC-01",
+        "name": "CNC Machine 01",
+        "type": "Standard CNC",
+        "capacity_per_hour": 25,
+        "supported_products": [
+            "AX-100",
+            "AX-200"
+        ],
+        "status": "operational",
+        "overtime_available": true,
+        "overtime_cost_per_hour": 2000,
+        "strategic_importance": "high"
+    },
+    {
+        "id": "CNC-02",
+        "name": "CNC Machine 02",
+        "type": "Precision CNC",
+        "capacity_per_hour": 30,
+        "supported_products": [
+            "AX-100",
+            "AX-200"
+        ],
+        "status": "operational",
+        "overtime_available": false,
+        "overtime_cost_per_hour": 0,
+        "strategic_importance": "critical"
+    },
+    {
+        "id": "FIN-01",
+        "name": "Surface Finishing Station",
+        "type": "Surface Finishing",
+        "capacity_per_hour": 45,
+        "supported_products": [
+            "AX-100",
+            "AX-200"
+        ],
+        "status": "operational",
+        "overtime_available": false,
+        "strategic_importance": "medium"
+    },
+    {
+        "id": "ASM-A",
+        "name": "Assembly Line A",
+        "type": "Assembly",
+        "capacity_per_hour": 22,
+        "supported_products": [
+            "AX-100"
+        ],
+        "status": "operational",
+        "overtime_available": false,
+        "strategic_importance": "medium"
+    },
+    {
+        "id": "ASM-B",
+        "name": "Assembly Line B",
+        "type": "Assembly",
+        "capacity_per_hour": 18,
+        "supported_products": [
+            "AX-100",
+            "AX-200"
+        ],
+        "status": "operational",
+        "overtime_available": false,
+        "strategic_importance": "high"
+    },
+    {
+        "id": "QC-01",
+        "name": "Quality Control Station",
+        "type": "Quality Inspection",
+        "capacity_per_hour": 40,
+        "supported_products": [
+            "AX-100",
+            "AX-200"
+        ],
+        "status": "operational",
+        "overtime_available": false,
+        "strategic_importance": "medium"
+    },
+    {
+        "id": "PK-01",
+        "name": "Packaging Station",
+        "type": "Packaging",
+        "capacity_per_hour": 50,
+        "supported_products": [
+            "AX-100",
+            "AX-200"
+        ],
+        "status": "operational",
+        "overtime_available": false,
+        "strategic_importance": "low"
+    }
+]

@@ -1,0 +1,79 @@
+[
+    {
+        "id": "ORD-101",
+        "product": "AX-100",
+        "quantity": 250,
+        "priority": "Normal",
+        "priority_weight": 2,
+        "deadline_hour": 18,
+        "value": 150000,
+        "status": "scheduled",
+        "risk_status": "none"
+    },
+    {
+        "id": "ORD-102",
+        "product": "AX-100",
+        "quantity": 180,
+        "priority": "High",
+        "priority_weight": 3,
+        "deadline_hour": 12,
+        "value": 135000,
+        "status": "scheduled",
+        "risk_status": "none"
+    },
+    {
+        "id": "ORD-103",
+        "product": "AX-200",
+        "quantity": 120,
+        "priority": "Critical",
+        "priority_weight": 4,
+        "deadline_hour": 10,
+        "value": 240000,
+        "status": "scheduled",
+        "risk_status": "none"
+    },
+    {
+        "id": "ORD-104",
+        "product": "AX-200",
+        "quantity": 150,
+        "priority": "High",
+        "priority_weight": 3,
+        "deadline_hour": 20,
+        "value": 285000,
+        "status": "scheduled",
+        "risk_status": "none"
+    },
+    {
+        "id": "ORD-105",
+        "product": "AX-100",
+        "quantity": 300,
+        "priority": "Normal",
+        "priority_weight": 2,
+        "deadline_hour": 30,
+        "value": 180000,
+        "status": "scheduled",
+        "risk_status": "none"
+    },
+    {
+        "id": "ORD-106",
+        "product": "AX-200",
+        "quantity": 80,
+        "priority": "Critical",
+        "priority_weight": 4,
+        "deadline_hour": 28,
+        "value": 160000,
+        "status": "scheduled",
+        "risk_status": "none"
+    },
+    {
+        "id": "ORD-107",
+        "product": "AX-100",
+        "quantity": 220,
+        "priority": "High",
+        "priority_weight": 3,
+        "deadline_hour": 24,
+        "value": 165000,
+        "status": "scheduled",
+        "risk_status": "none"
+    }
+]

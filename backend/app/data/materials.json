@@ -1,0 +1,43 @@
+[
+    {
+        "id": "M-AL",
+        "name": "Aluminum Billets",
+        "current_stock": 2200,
+        "safety_stock": 700,
+        "unit": "units",
+        "supplier": "MetalCore Supplies",
+        "lead_time_hours": 48,
+        "used_by": {
+            "AX-100": 1,
+            "AX-200": 1
+        },
+        "status": "healthy"
+    },
+    {
+        "id": "M-FAST",
+        "name": "Fastener Kits",
+        "current_stock": 1300,
+        "safety_stock": 400,
+        "unit": "kits",
+        "supplier": "FastFix Components",
+        "lead_time_hours": 24,
+        "used_by": {
+            "AX-100": 1,
+            "AX-200": 2
+        },
+        "status": "healthy"
+    },
+    {
+        "id": "M-SEAL",
+        "name": "Precision Seals",
+        "current_stock": 700,
+        "safety_stock": 250,
+        "unit": "seals",
+        "supplier": "SealTech",
+        "lead_time_hours": 72,
+        "used_by": {
+            "AX-200": 1
+        },
+        "status": "healthy"
+    }
+]
