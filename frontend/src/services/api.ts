@@ -13,8 +13,10 @@ import {
   adaptBackendPipelineToFrontend,
 } from './apiAdapter';
 
-// Configurable API base URL from Vite environment variable
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+// Configurable API base URL from Vite environment variable (defaults to relative path in production)
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://127.0.0.1:8000' : '')
+).replace(/\/+$/, '');
 
 // In-memory cache for the most recent pipeline result to maintain state persistence across refetches
 let cachedPipelineResult: PipelineResult | null = null;
