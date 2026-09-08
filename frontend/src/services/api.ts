@@ -1,22 +1,154 @@
 import { FactoryState, PipelineResult } from '../types';
-import { globalEngine } from './factoryEngine';
+import {
+  adaptBackendStateToFrontend,
+  adaptBackendPipelineToFrontend,
+} from './apiAdapter';
 
+// Configurable API base URL from Vite environment variable
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+
+// In-memory cache for the most recent pipeline result to maintain state persistence across refetches
+let cachedPipelineResult: PipelineResult | null = null;
+
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...(options.headers || {}),
+  };
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      let errDetail = `HTTP ${response.status} ${response.statusText}`;
+      try {
+        const errorJson = await response.json();
+        if (errorJson.detail) errDetail = typeof errorJson.detail === 'string' ? errorJson.detail : JSON.stringify(errorJson.detail);
+      } catch {
+        // ignore json parse error
+      }
+      throw new Error(errDetail);
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      throw new Error(`Cannot connect to PULSE backend at ${API_BASE_URL}. Ensure FastAPI is running on port 8000.`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Fetch the complete live factory state and current Factory Pulse score from the FastAPI backend.
+ */
 export async function fetchFactoryState(): Promise<FactoryState> {
-  return globalEngine.getState();
+  const [stateRes, pulseRes] = await Promise.all([
+    request<any>('/api/factory/state'),
+    request<any>('/api/pulse').catch(() => null),
+  ]);
+
+  return adaptBackendStateToFrontend(stateRes, pulseRes, cachedPipelineResult);
 }
 
+/**
+ * Reset factory state to initial healthy baseline.
+ */
 export async function resetFactory(): Promise<FactoryState> {
-  return globalEngine.reset();
+  await request('/api/factory/reset', { method: 'POST' });
+  cachedPipelineResult = null;
+  return fetchFactoryState();
 }
 
+/**
+ * Ingest an operational disruption event (either Scenario A or custom raw alert) into the multi-agent pipeline.
+ */
 export async function triggerDisruption(text: string, scenarioId?: string): Promise<PipelineResult> {
-  return globalEngine.triggerDisruption(text);
+  const isScenarioA =
+    scenarioId === 'SCENARIO_A' ||
+    (scenarioId?.toLowerCase().includes('scenario-a') ?? false) ||
+    (text.includes('CNC-02') && (text.toLowerCase().includes('gearbox') || text.toLowerCase().includes('failure')));
+
+  let backendResult: any;
+
+  if (isScenarioA) {
+    // Call dedicated Scenario A demo trigger endpoint
+    backendResult = await request<any>('/api/demo/trigger/scenario-a', { method: 'POST' });
+  } else {
+    // Call generic event ingestion endpoint with raw message
+    backendResult = await request<any>('/api/events', {
+      method: 'POST',
+      body: JSON.stringify({ message: text }),
+    });
+  }
+
+  const pipelineResult = adaptBackendPipelineToFrontend(backendResult);
+  cachedPipelineResult = pipelineResult;
+
+  return pipelineResult;
 }
 
-export async function executePlan(planId: string): Promise<{ success: boolean; message: string; factory_state: FactoryState }> {
-  return globalEngine.executePlan(planId);
+/**
+ * Execute a recovery plan on the live factory state.
+ */
+export async function executePlan(
+  planId: string
+): Promise<{ success: boolean; message: string; factory_state: FactoryState }> {
+  const normalizedPlanId = planId.toUpperCase();
+  const res = await request<any>(`/api/recovery/${normalizedPlanId}/execute`, { method: 'POST' });
+
+  // Refetch live factory state
+  const updatedState = await fetchFactoryState();
+
+  return {
+    success: res.status === 'success',
+    message: res.message || `Plan ${planId} executed successfully`,
+    factory_state: updatedState,
+  };
 }
 
-export async function sendChatQuery(message: string): Promise<{ reply: string; citations: string[] }> {
-  return globalEngine.answerChat(message);
+/**
+ * Grounded factory operations Q&A using live backend chat endpoint.
+ */
+export async function sendChatQuery(
+  message: string
+): Promise<{ reply: string; citations: string[] }> {
+  const res = await request<any>('/api/chat', {
+    method: 'POST',
+    body: JSON.stringify({ query: message }),
+  });
+
+  return {
+    reply: res.answer || "I don't have enough factory data to answer that.",
+    citations: res.sources && res.sources.length > 0 ? res.sources : ['Factory Digital Twin', 'Oracle Simulation'],
+  };
+}
+
+/**
+ * Granular intelligence endpoints for specific inspect views
+ */
+export async function fetchImpact(eventId: string): Promise<any> {
+  return request(`/api/impact/${eventId}`);
+}
+
+export async function fetchAgentLogs(eventId: string): Promise<any> {
+  return request(`/api/agents/${eventId}`);
+}
+
+export async function fetchRecoveryPlans(eventId: string): Promise<any> {
+  return request(`/api/recovery/${eventId}`);
+}
+
+export async function fetchAlerts(): Promise<any[]> {
+  return request('/api/alerts');
+}
+
+export async function fetchPulse(): Promise<any> {
+  return request('/api/pulse');
 }
