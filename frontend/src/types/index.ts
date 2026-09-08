@@ -2,13 +2,37 @@ export interface MachineState {
   id: string;
   name: string;
   type: string;
-  status: 'operational' | 'degraded' | 'failed' | 'maintenance';
+  department?: string;
+  status: 'operational' | 'idle' | 'degraded' | 'failed' | 'maintenance' | 'offline';
   capacity_per_hour: number;
   current_utilization: number;
+  utilization?: number;
   max_utilization: number;
   operating_cost_per_hour: number;
   overtime_cost_per_hour: number;
+  overtime_available?: boolean;
   supported_operations: string[];
+  capabilities?: string[];
+  supported_products?: string[];
+  notes?: string;
+  strategic_importance?: string;
+  is_custom?: boolean;
+}
+
+export interface MachineFormData {
+  name: string;
+  id?: string;
+  type: string;
+  department: string;
+  status: 'operational' | 'idle' | 'maintenance' | 'offline';
+  capacity_per_hour: number;
+  capabilities: string[];
+  supported_products?: string[];
+  utilization: number;
+  overtime_available: boolean;
+  overtime_cost_per_hour: number;
+  notes?: string;
+  strategic_importance?: string;
 }
 
 export interface MaterialState {

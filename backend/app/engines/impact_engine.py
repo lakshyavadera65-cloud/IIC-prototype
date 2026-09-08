@@ -56,11 +56,14 @@ class ImpactEngine:
             # 2. Identify affected scheduled tasks on this machine and via dependency graph
             affected_task_ids = []
             affected_order_ids_set = set()
+            affected_operations = set()
 
             for task in self.factory_state.schedule:
                 if task.get("resource_id") == entity_id:
                     affected_task_ids.append(task.get("id"))
                     affected_order_ids_set.add(task.get("order_id"))
+                    if task.get("operation"):
+                        affected_operations.add(task.get("operation"))
                     result["affected_tasks"].append(task)
 
             # Include dependency graph descendants
@@ -70,14 +73,57 @@ class ImpactEngine:
                 if node and node.get("type") == "order":
                     affected_order_ids_set.add(node_id)
 
-            # 3. Find compatible alternative machines
-            compatible_alternatives = []
+            # 3. Find compatible alternative machines dynamically by capability and product
+            OP_CAPABILITY_MAP = {
+                "CNC_MACHINING": {"cnc", "machining", "precision cutting", "gear machining", "milling", "drilling", "turning", "lathe"},
+                "SURFACE_FINISHING": {"finishing", "surface finishing", "polishing", "coating", "grinding"},
+                "ASSEMBLY": {"assembly", "sub-assembly", "fastening", "integration"},
+                "QUALITY_CONTROL": {"quality inspection", "quality control", "inspection", "testing", "metrology"},
+                "PACKAGING": {"packaging", "boxing", "shipping", "crating"}
+            }
+
+            candidate_scored = []
             for machine in self.factory_state.machines:
-                if machine["id"] != entity_id and machine.get("status") == "operational":
-                    # Check product overlap
-                    overlap = set(machine.get("supported_products", [])).intersection(set(supported_products))
-                    if overlap:
-                        compatible_alternatives.append(machine)
+                if machine["id"] == entity_id or machine.get("status") not in ("operational", "idle"):
+                    continue
+
+                # 1. Operation & Capability compatibility (MANDATORY)
+                match_reasons = []
+                machine_caps = [c.lower() for c in machine.get("capabilities", [])]
+                m_type = machine.get("type", "").lower()
+                m_dept = machine.get("department", "").lower()
+
+                op_compatible = False
+                if not affected_operations:
+                    failed_type = (failed_machine.get("type") or "").lower() if failed_machine else ""
+                    if failed_type and (failed_type in m_type or m_type in failed_type):
+                        op_compatible = True
+                else:
+                    for op in affected_operations:
+                        keywords = OP_CAPABILITY_MAP.get(op, {op.lower()})
+                        for cap in machine_caps:
+                            if any(kw in cap or cap in kw for kw in keywords):
+                                op_compatible = True
+                                match_reasons.append(f"Capability '{cap}' matches {op}")
+                                break
+                        if any(kw in m_type or kw in m_dept for kw in keywords):
+                            op_compatible = True
+                            match_reasons.append(f"Type/Dept matches {op}")
+
+                if not op_compatible:
+                    continue
+
+                # 2. Product compatibility
+                prod_overlap = set(machine.get("supported_products", [])).intersection(set(supported_products))
+                if supported_products and machine.get("supported_products") and not prod_overlap:
+                    continue
+
+                cap = float(machine.get("capacity_per_hour", 25))
+                candidate_scored.append((machine, cap, match_reasons))
+
+            # Rank compatible alternatives by capacity (highest capacity first, then baseline stability)
+            candidate_scored.sort(key=lambda x: x[1], reverse=True)
+            compatible_alternatives = [item[0] for item in candidate_scored]
 
             alt_machine = compatible_alternatives[0] if compatible_alternatives else None
             alt_capacity_avail = (alt_machine.get("capacity_per_hour", 25) * duration_hours) if alt_machine else 0.0

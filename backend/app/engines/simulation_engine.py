@@ -12,27 +12,39 @@ class SimulationEngine:
         plan_name = plan.get("name", "")
         cost = float(plan.get("estimated_cost", 0.0))
         actions = plan.get("actions", [])
+        entity_id = impact_result.get("entity_id", "CNC-02")
+        alt_machine_id = impact_result.get("capacity_impact", {}).get("alternative_machine_id") or "CNC-01"
+
+        def build_utilization(alt_util: float) -> dict:
+            util_map = {
+                "CNC-01": 80.0,
+                "CNC-02": 0.0 if entity_id == "CNC-02" else 85.0,
+                "FIN-01": 85.0,
+                "ASM-A": 78.0,
+                "ASM-B": 88.0,
+                "QC-01": 82.0,
+                "PK-01": 75.0
+            }
+            util_map[entity_id] = 0.0
+            util_map[alt_machine_id] = alt_util
+            for m in self.factory_state.machines:
+                mid = m["id"]
+                if mid not in util_map:
+                    util_map[mid] = float(m.get("utilization") or m.get("current_utilization") or 75.0)
+            return util_map
 
         # Weights: Deadline (40%), Orders Saved (25%), Cost Efficiency (20%), Utilization (15%)
         if plan_id == "PLAN-A":
-            # Full Reroute: causes bottleneck on CNC-01, delay to ORD-102 (deadline 12)
+            # Full Reroute: causes bottleneck on alt_machine, delay to ORD-102 (deadline 12)
             delay_hours = 7.5
             orders_saved = 1
             deadline_violations = 1  # ORD-102 High gets delayed past hour 12
             idle_time_hours = 4.2
-            utilization = {
-                "CNC-01": 98.0,
-                "CNC-02": 0.0,
-                "FIN-01": 82.0,
-                "ASM-A": 68.0,
-                "ASM-B": 85.0,
-                "QC-01": 78.0,
-                "PK-01": 72.0
-            }
+            utilization = build_utilization(98.0)
             reasoning = [
-                "Full reroute successfully prevents complete shutdown of AX-200 machining",
-                "Causes severe queue congestion on CNC-01 resulting in 1 deadline violation for ORD-102",
-                "Zero immediate overtime cost incurred, but results in high downstream line idle time (4.2h)"
+                f"Full reroute successfully prevents complete shutdown of machining from {entity_id}",
+                f"Causes queue congestion on {alt_machine_id} resulting in potential deadline friction",
+                "Zero immediate overtime cost incurred, but results in downstream line idle time (4.2h)"
             ]
 
         elif plan_id == "PLAN-B":
@@ -41,40 +53,24 @@ class SimulationEngine:
             orders_saved = 2
             deadline_violations = 0  # ORD-105 deadline is 30, so delay of 4h is easily absorbed!
             idle_time_hours = 1.5
-            utilization = {
-                "CNC-01": 92.0,
-                "CNC-02": 0.0,
-                "FIN-01": 88.0,
-                "ASM-A": 84.0,
-                "ASM-B": 90.0,
-                "QC-01": 86.0,
-                "PK-01": 80.0
-            }
+            utilization = build_utilization(92.0)
             reasoning = [
                 "Protects Critical order ORD-103 (deadline hour 10) with 0 deadline violations",
-                "Protects High order ORD-104 while preserving schedule integrity on CNC-01",
+                f"Protects High order ORD-104 while preserving schedule integrity on {alt_machine_id}",
                 "Costs $0 in overtime expenses by postponing flexible normal order ORD-105 (deadline hour 30)",
-                "Maintains balanced factory-wide machine utilization (average 74.3%) and minimal idle time (1.5h)"
+                "Maintains balanced factory-wide machine utilization and minimal idle time (1.5h)"
             ]
 
         elif plan_id == "PLAN-C":
-            # Priority Reroute + Overtime: 0 delay, 0 violations, but $8,000 cost
+            # Priority Reroute + Overtime: 0 delay, 0 violations, but overtime cost
             delay_hours = 0.5
             orders_saved = 2
             deadline_violations = 0
             idle_time_hours = 0.8
-            utilization = {
-                "CNC-01": 100.0,
-                "CNC-02": 0.0,
-                "FIN-01": 92.0,
-                "ASM-A": 88.0,
-                "ASM-B": 92.0,
-                "QC-01": 88.0,
-                "PK-01": 85.0
-            }
+            utilization = build_utilization(100.0)
             reasoning = [
                 "Guarantees near-zero production delay (0.5h) and 0 deadline violations across all orders",
-                "Incurs $8,000 in overtime labor operating expenses on CNC-01",
+                f"Incurs ${cost:,.0f} in overtime labor operating expenses on {alt_machine_id}",
                 "Slightly lower cost-efficiency score due to premium labor expenditure"
             ]
 

@@ -1,4 +1,4 @@
-import { FactoryState, PipelineResult } from '../types';
+import { FactoryState, PipelineResult, MachineFormData } from '../types';
 import {
   adaptBackendStateToFrontend,
   adaptBackendPipelineToFrontend,
@@ -55,6 +55,35 @@ export async function fetchFactoryState(): Promise<FactoryState> {
   ]);
 
   return adaptBackendStateToFrontend(stateRes, pulseRes, cachedPipelineResult);
+}
+
+/**
+ * Add a new workstation / machine to the live factory state.
+ */
+export async function createMachine(data: MachineFormData): Promise<any> {
+  return request<any>('/api/factory/machines', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Update an existing machine's operational status or configuration.
+ */
+export async function updateMachine(machineId: string, updates: Partial<MachineFormData>): Promise<any> {
+  return request<any>(`/api/factory/machines/${encodeURIComponent(machineId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  });
+}
+
+/**
+ * Safely delete a workstation from the factory.
+ */
+export async function deleteMachine(machineId: string): Promise<any> {
+  return request<any>(`/api/factory/machines/${encodeURIComponent(machineId)}`, {
+    method: 'DELETE',
+  });
 }
 
 /**

@@ -9,9 +9,12 @@ class FactoryState:
         # Get the app directory
         self.app_dir = Path(__file__).resolve().parent.parent
         self.data_dir = self.app_dir / "data"
+        self.custom_machines_file = self.data_dir / "custom_machines.json"
 
         # Load factory data
-        self.machines = self._load_json("machines.json")
+        self.baseline_machines = self._load_json("machines.json")
+        self.custom_machines = self._load_custom_machines()
+        self.machines = deepcopy(self.baseline_machines) + deepcopy(self.custom_machines)
         self.materials = self._load_json("materials.json")
         self.orders = self._load_json("orders.json")
         self.schedule = self._load_json("schedule.json")
@@ -24,8 +27,27 @@ class FactoryState:
         self.recovery_plans = []
         self.resolutions = []
 
-        # Keep original state for reset functionality later
+        # Keep original state for reset functionality
         self.initial_state = self._create_snapshot()
+
+    def _load_custom_machines(self) -> list:
+        """Safely load user-added custom workstations."""
+        if not self.custom_machines_file.exists():
+            return []
+        try:
+            with open(self.custom_machines_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except Exception:
+            return []
+
+    def _save_custom_machines(self):
+        """Safely write user-added custom workstations to persistent storage."""
+        try:
+            with open(self.custom_machines_file, "w", encoding="utf-8") as f:
+                json.dump(self.custom_machines, f, indent=4)
+        except Exception as e:
+            print(f"Warning: Failed to persist custom machines: {e}")
 
     def _load_json(self, filename):
         """Load a JSON file from the data directory."""
@@ -213,9 +235,139 @@ class FactoryState:
             "pulse": new_pulse.model_dump() if hasattr(new_pulse, "model_dump") else new_pulse
         }
 
-    def reset(self):
-        """Reset the factory to its original healthy state."""
-        self.machines = deepcopy(self.initial_state["machines"])
+    def add_machine(self, machine_data: dict) -> dict:
+        """Add a new workstation / machine to factory state and persist it."""
+        m_id = (machine_data.get("id") or "").strip().upper()
+        m_name = (machine_data.get("name") or "").strip()
+
+        if not m_id:
+            m_id = m_name.replace(" ", "-").upper()[:15]
+            machine_data["id"] = m_id
+
+        # Check for duplicates
+        for existing in self.machines:
+            if existing["id"].upper() == m_id:
+                raise ValueError(f"Machine with ID '{m_id}' already exists.")
+            if existing.get("name", "").strip().lower() == m_name.lower():
+                raise ValueError(f"Machine with name '{m_name}' already exists.")
+
+        # Derive supported products if missing
+        supported_products = machine_data.get("supported_products")
+        if not supported_products:
+            m_type = machine_data.get("type", "").lower()
+            m_dept = machine_data.get("department", "").lower()
+            caps = [c.lower() for c in machine_data.get("capabilities", [])]
+            if any(k in m_type or k in m_dept for k in ("cnc", "machin", "lathe", "mill")) or any("machin" in c or "cutt" in c or "mill" in c for c in caps):
+                supported_products = ["AX-100", "AX-200"]
+            else:
+                supported_products = ["AX-100", "AX-200"]
+            machine_data["supported_products"] = supported_products
+
+        # Build clean machine record
+        new_machine = {
+            "id": m_id,
+            "name": m_name,
+            "type": machine_data.get("type", "CNC Machine"),
+            "department": machine_data.get("department", "Precision Machining"),
+            "status": machine_data.get("status", "operational").lower(),
+            "capacity_per_hour": float(machine_data.get("capacity_per_hour", 30)),
+            "capabilities": machine_data.get("capabilities", []),
+            "supported_products": supported_products,
+            "utilization": float(machine_data.get("utilization", 75.0)),
+            "current_utilization": float(machine_data.get("utilization", 75.0)),
+            "overtime_available": bool(machine_data.get("overtime_available", True)),
+            "overtime_cost_per_hour": float(machine_data.get("overtime_cost_per_hour", 2000.0)),
+            "strategic_importance": machine_data.get("strategic_importance", "high").lower(),
+            "notes": machine_data.get("notes"),
+            "is_custom": True
+        }
+
+        self.custom_machines.append(new_machine)
+        self.machines.append(new_machine)
+        self._save_custom_machines()
+
+        return new_machine
+
+    def update_machine(self, machine_id: str, updates: dict) -> dict:
+        """Update an existing machine's properties or status."""
+        machine = self.get_machine(machine_id)
+        if not machine:
+            raise ValueError(f"Machine with ID '{machine_id}' not found.")
+
+        # Update fields
+        for key, val in updates.items():
+            if val is not None and key != "id":
+                if key == "status":
+                    machine[key] = val.value.lower() if hasattr(val, "value") else str(val).lower()
+                elif key == "utilization":
+                    machine["utilization"] = float(val)
+                    machine["current_utilization"] = float(val)
+                elif key in ("capacity_per_hour", "overtime_cost_per_hour"):
+                    machine[key] = float(val)
+                elif key == "overtime_available":
+                    machine[key] = bool(val)
+                else:
+                    machine[key] = val
+
+        # If it's a custom machine, update in custom_machines list and persist
+        for cm in self.custom_machines:
+            if cm["id"] == machine_id:
+                cm.update(machine)
+                self._save_custom_machines()
+                break
+
+        return machine
+
+    def delete_machine(self, machine_id: str) -> dict:
+        """Safely delete a machine, checking if it is currently scheduled."""
+        machine = self.get_machine(machine_id)
+        if not machine:
+            raise ValueError(f"Machine with ID '{machine_id}' not found.")
+
+        # Check if active schedule relies on this machine
+        scheduled_tasks = [t for t in self.schedule if t.get("resource_id") == machine_id]
+        if scheduled_tasks:
+            task_ids = ", ".join([t.get("id") for t in scheduled_tasks[:3]])
+            raise ValueError(f"Cannot delete machine '{machine_id}': it is currently allocated to scheduled task(s) [{task_ids}].")
+
+        # Disallow deleting core baseline machines needed by core system
+        baseline_ids = {m["id"] for m in self.baseline_machines}
+        if machine_id in baseline_ids:
+            raise ValueError(f"Cannot delete core baseline machine '{machine_id}'. Only custom added workstations can be deleted.")
+
+        # Remove from state
+        self.machines = [m for m in self.machines if m["id"] != machine_id]
+        self.custom_machines = [m for m in self.custom_machines if m["id"] != machine_id]
+        self._save_custom_machines()
+
+        return {
+            "status": "success",
+            "message": f"Workstation '{machine_id}' deleted successfully.",
+            "machine_id": machine_id
+        }
+
+    def reset(self, hard_reset: bool = False):
+        """
+        Reset factory operational state.
+        Option B (Default): Clears active disruptions, resets machine operational statuses,
+        and restores schedule while preserving user-added custom workstations.
+        If hard_reset=True: Wipes custom machines and restores pure 7-machine baseline.
+        """
+        if hard_reset:
+            self.custom_machines = []
+            self._save_custom_machines()
+            self.machines = deepcopy(self.baseline_machines)
+        else:
+            base = deepcopy(self.baseline_machines)
+            customs = deepcopy(self.custom_machines)
+            for m in customs:
+                if m.get("status") in ("offline", "failed", "degraded"):
+                    m["status"] = "operational"
+                m["overtime_active"] = False
+            for m in base:
+                m["overtime_active"] = False
+            self.machines = base + customs
+
         self.materials = deepcopy(self.initial_state["materials"])
         self.orders = deepcopy(self.initial_state["orders"])
         self.schedule = deepcopy(self.initial_state["schedule"])

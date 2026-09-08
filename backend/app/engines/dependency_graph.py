@@ -11,6 +11,7 @@ class DependencyGraph:
 
 
     def build_graph(self):
+        self.graph.clear()
 
         # Add machine nodes
         for machine in self.factory_state.machines:

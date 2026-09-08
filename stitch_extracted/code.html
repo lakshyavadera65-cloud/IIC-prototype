@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"secondary-fixed":"#6ffbbe","secondary-container":"#00a572","surface":"#10141a","primary-fixed-dim":"#4cd7f6","error-container":"#93000a","primary-fixed":"#acedff","on-primary-fixed":"#001f26","surface-variant":"#31353c","tertiary":"#ffb95f","on-tertiary":"#472a00","on-tertiary-fixed":"#2a1700","inverse-on-surface":"#2d3137","tertiary-container":"#e79400","secondary-fixed-dim":"#4edea3","on-tertiary-container":"#563400","surface-container-high":"#262a31","on-primary-container":"#00424f","surface-container":"#1c2026","on-tertiary-fixed-variant":"#653e00","on-error-container":"#ffdad6","primary-container":"#06b6d4","surface-container-highest":"#31353c","background":"#10141a","primary":"#4cd7f6","on-surface-variant":"#bcc9cd","surface-container-low":"#181c22","outline-variant":"#3d494c","secondary":"#4edea3","surface-container-lowest":"#0a0e14","on-primary":"#003640","on-surface":"#dfe2eb","outline":"#869397","error":"#ffb4ab","on-secondary-container":"#00311f","on-primary-fixed-variant":"#004e5c","on-error":"#690005","on-secondary-fixed":"#002113","on-background":"#dfe2eb","surface-tint":"#4cd7f6","inverse-surface":"#dfe2eb","on-secondary-fixed-variant":"#005236","tertiary-fixed":"#ffddb8","tertiary-fixed-dim":"#ffb95f","inverse-primary":"#00687a","surface-bright":"#353940","surface-dim":"#10141a","on-secondary":"#003824"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"gutter-panel":"0.75rem","space-lg":"1rem","space-md":"0.75rem","space-2xl":"1.5rem","space-2xs":"0.125rem","space-xl":"1.25rem","margin-screen":"1rem","space-xs":"0.25rem","space-sm":"0.5rem","gutter-dense":"0.5rem"},fontFamily:{"body-sm":["Inter"],"headline-lg":["Inter"],"mono-data":["JetBrains Mono"],"headline-md":["Inter"],"mono-metric-md":["JetBrains Mono"],"body-md":["Inter"],"label-caps":["JetBrains Mono"],"mono-metric-lg":["JetBrains Mono"],"mono-code":["JetBrains Mono"],"headline-xl":["Inter"],"headline-sm":["Inter"],"body-lg":["Inter"]},fontSize:{"body-sm":["11px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"mono-data":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"mono-metric-md":["18px",{"lineHeight":"22px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-md":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-caps":["10px",{"lineHeight":"12px","letterSpacing":"0.08em","fontWeight":"600"}],"mono-metric-lg":["28px",{"lineHeight":"32px","letterSpacing":"-0.03em","fontWeight":"600"}],"mono-code":["11px",{"lineHeight":"15px","fontWeight":"400"}],"headline-xl":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["14px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"600"}],"body-lg":["14px",{"lineHeight":"20px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface-container-lowest font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-space-md"><div class="flex flex-col gap-space-md"><div class="px-space-lg flex items-center gap-space-sm"><div class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.6)]"></div><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">COCKPIT NODE 04</span></div><nav class="flex flex-col px-space-sm gap-space-2xs" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded transition-colors bg-primary-container text-on-primary-container font-headline-sm" data-path="tactical-overview" href="#"><span class="material-symbols-outlined text-[18px]">grid_view</span><span class="font-body-md text-body-md">Tactical Overview</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="telemetry-stream" href="#"><span class="material-symbols-outlined text-[18px]">terminal</span><span class="font-body-md text-body-md">Telemetry Feeds</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="agent-orchestration" href="#"><span class="material-symbols-outlined text-[18px]">hub</span><span class="font-body-md text-body-md">Autonomous Agents</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="incident-clash-matrix" href="#"><span class="material-symbols-outlined text-[18px]">warning</span><span class="font-body-md text-body-md">Clash Matrix</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="hardware-health" href="#"><span class="material-symbols-outlined text-[18px]">precision_manufacturing</span><span class="font-body-md text-body-md">Hardware Topology</span></a></nav></div><div class="px-space-md flex flex-col gap-space-xs"><div class="bg-surface-container p-space-sm rounded flex flex-col gap-space-2xs"><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps text-on-surface-variant">LATENCY</span><span class="font-mono-code text-mono-code text-secondary">4.2ms</span></div><div class="flex items-center justify-between"><span class="font-label-caps text-label-caps text-on-surface-variant">BUFFER FILL</span><span class="font-mono-code text-mono-code text-primary">31%</span></div></div><div class="flex items-center justify-between px-space-xs"><span class="font-mono-code text-mono-code text-on-surface-variant">VER 4.19-SEC</span><span class="font-mono-code text-mono-code text-secondary">ONLINE</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 z-40 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.5)]"><div class="h-16 w-full px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-md"><img alt="PULSE Cockpit Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XpmpP8upZnvzKtFW2V1tYW8djnHOIDeexNyadwdSXaZw-fVkwVAwUtuG8p0QcrCr_TYZvOZ3mgw3D2mf_LYq9iVjSvDplSrhQnZp-BkDSzQ6P_XxuqwrG1Qs8oZVPBLsmkpWQnCKwAe35Kgt1sdZlCRZ2_hLBTNcD9852BzuHUPY5IhepZ-tk3rx3pVwp3kcgh_vb611ei7Pqkgw-qS1RpYds_KDy8XN0PXBPTjmfLnGHbAGD91FdsXw"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-wider">PULSE</span><span class="font-label-caps text-label-caps text-primary uppercase">Autonomous OS</span></div></div><div class="h-6 w-px bg-surface-variant"></div><div class="flex items-center gap-space-xs"><div class="px-space-sm py-space-2xs bg-surface-container rounded flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[14px]">schedule</span><span class="font-mono-code text-mono-code text-on-surface">14:28:09 UTC</span></div><div class="px-space-sm py-space-2xs bg-surface-container rounded flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span><span class="font-label-caps text-label-caps text-on-surface-variant">PUNE-04:</span><span class="font-mono-code text-mono-code text-secondary font-semibold">ACTIVE AUTONOMOUS</span></div><div class="px-space-sm py-space-2xs bg-surface-container rounded flex items-center gap-space-xs"><span class="material-symbols-outlined text-on-surface-variant text-[14px]">sensors</span><span class="font-mono-code text-mono-code text-on-surface-variant">12.4k msg/s</span></div></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm px-space-md py-space-2xs bg-surface-container rounded shadow-[0_0_12px_rgba(78,222,163,0.15)]"><div class="relative flex items-center justify-center w-9 h-9"><svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36"><path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path><path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="94, 100" stroke-linecap="square" stroke-width="3"></path></svg><span class="absolute font-label-caps text-[9px] text-secondary font-bold">94%</span></div><div class="flex flex-col"><span class="font-label-caps text-[9px] text-on-surface-variant leading-none uppercase">Factory Health</span><span class="font-mono-metric-md text-mono-metric-md text-secondary leading-tight">94.0%</span></div></div><div class="flex items-center gap-space-2xs bg-surface-container-lowest p-space-2xs rounded"><button class="px-space-sm py-space-2xs rounded bg-surface-container hover:bg-surface-container-high hover:text-on-surface text-on-surface-variant transition-colors flex items-center gap-space-2xs" type="button"><span class="font-label-caps text-label-caps bg-surface-container-high px-space-2xs py-space-2xs rounded text-primary">SIM-A</span><span class="font-body-sm text-body-sm whitespace-nowrap">CNC-02 Failure</span></button><button class="px-space-sm py-space-2xs rounded bg-surface-container hover:bg-surface-container-high hover:text-on-surface text-on-surface-variant transition-colors flex items-center gap-space-2xs" type="button"><span class="font-label-caps text-label-caps bg-surface-container-high px-space-2xs py-space-2xs rounded text-tertiary">SIM-B</span><span class="font-body-sm text-body-sm whitespace-nowrap">Shipment Delay</span></button><button class="px-space-sm py-space-2xs rounded bg-surface-container hover:bg-surface-container-high hover:text-on-surface text-on-surface-variant transition-colors flex items-center gap-space-2xs" type="button"><span class="font-label-caps text-label-caps bg-surface-container-high px-space-2xs py-space-2xs rounded text-error">SIM-C</span><span class="font-body-sm text-body-sm whitespace-nowrap">Inventory Shortage</span></button></div><button class="flex items-center gap-space-xs px-space-sm py-space-2xs bg-error-container text-on-error-container rounded hover:bg-error hover:text-on-error transition-colors shadow-[0_0_8px_rgba(255,180,171,0.2)]" type="button"><span class="material-symbols-outlined text-[16px]">restart_alt</span><span class="font-label-caps text-label-caps uppercase">Reset Factory</span></button><div class="h-6 w-px bg-surface-variant"></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-16 bg-surface-container-lowest min-h-screen w-full"><div class="flex flex-col w-full text-on-surface p-space-md gap-space-md select-none">
+<!-- ================= TOP ZONE: TELEMETRY STREAM & INCIDENT BANNER ================= -->
+<section class="flex flex-col gap-space-xs">
+<!-- Live Critical Disruption Ticker -->
+<div class="relative overflow-hidden rounded bg-surface-container-low p-space-sm shadow-md flex flex-wrap items-center justify-between gap-space-md">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error animate-pulse"></div>
+<div class="flex items-center gap-space-md pl-space-xs">
+<div class="flex items-center gap-space-xs bg-error/15 text-error px-space-sm py-space-2xs rounded">
+<span class="material-symbols-outlined text-[16px] animate-spin">sync_problem</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-bold">ALERT E-409</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-error font-mono-data tracking-tight">CNC-02 Spindle Bearing Overheat [E-409]</span>
+<span class="text-on-surface-variant font-mono-code text-mono-code">· Logged 14:22:08 UTC</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Thermal signature spiked to 104.8°C (limit 85.0°C). Secondary harmonic vibration 8.4mm/s. Immediate recovery reroute triggered.</span>
+</div>
+</div>
+<!-- Quick Telemetry Micro-Pills -->
+<div class="flex items-center gap-space-xs">
+<div class="flex flex-col items-end px-space-sm py-space-2xs bg-surface-container rounded">
+<span class="font-label-caps text-label-caps text-on-surface-variant">FACTORY UPTIME</span>
+<span class="font-mono-metric-md text-mono-metric-md text-secondary">99.82%</span>
+</div>
+<div class="flex flex-col items-end px-space-sm py-space-2xs bg-surface-container rounded">
+<span class="font-label-caps text-label-caps text-on-surface-variant">THROUGHPUT</span>
+<span class="font-mono-metric-md text-mono-metric-md text-primary">840 <span class="text-body-sm text-on-surface-variant font-normal">u/h</span></span>
+</div>
+<div class="flex flex-col items-end px-space-sm py-space-2xs bg-surface-container rounded">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ORDERS AT RISK</span>
+<span class="font-mono-metric-md text-mono-metric-md text-error">4 WOs</span>
+</div>
+<div class="flex flex-col items-end px-space-sm py-space-2xs bg-surface-container rounded">
+<span class="font-label-caps text-label-caps text-on-surface-variant">AUTONOMOUS STATUS</span>
+<span class="font-mono-code text-mono-code text-secondary-fixed flex items-center gap-space-2xs">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span> MITIGATING
+          </span>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= WORKSPACE: 16-COL DENSE GRID ================= -->
+<div class="grid grid-cols-1 xl:grid-cols-16 gap-space-md items-start">
+<!-- ================= LEFT RAIL: MULTI-AGENT CASCADE (4 COLS) ================= -->
+<aside class="xl:col-span-4 flex flex-col gap-space-sm bg-surface-container-low p-space-md rounded shadow-sm">
+<div class="flex items-center justify-between pb-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">hub</span>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wide">Multi-Agent Cascade</span>
+</div>
+<span class="font-label-caps text-label-caps bg-primary/10 text-primary px-space-xs py-space-2xs rounded font-semibold">STAGE 3/4</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Autonomous consensus pipeline addressing CNC-02 fault event in isolated virtual twin buffer.</p>
+<!-- Visual Conduit Rail with 4 Agents -->
+<div class="relative flex flex-col gap-space-sm pl-space-sm my-space-xs">
+<!-- Vertical glowing pipeline conduit -->
+<div class="absolute left-2.5 top-3 bottom-5 w-0.5 bg-surface-variant">
+<div class="w-full bg-gradient-to-b from-secondary via-secondary to-primary h-3/4"></div>
+</div>
+<!-- 1. Sentinel Agent -->
+<div class="relative flex items-start gap-space-sm pl-space-md">
+<div class="absolute -left-1 top-0.5 w-4 h-4 rounded-full bg-surface-container-high flex items-center justify-center shadow-[0_0_8px_rgba(78,222,163,0.6)]">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col w-full bg-surface-container p-space-sm rounded gap-space-2xs shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[16px]">radar</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Sentinel Agent</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary bg-secondary/15 px-space-xs py-space-2xs rounded">DONE · 12ms</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Extracted anomaly telemetry: Spindle vibration <span class="text-error font-mono-code">8.4mm/s</span> &gt; threshold <span class="text-on-surface font-mono-code">(2.5mm/s)</span>; predicted physical lock in 18 min.</p>
+</div>
+</div>
+<!-- 2. Impact Agent -->
+<div class="relative flex items-start gap-space-sm pl-space-md">
+<div class="absolute -left-1 top-0.5 w-4 h-4 rounded-full bg-surface-container-high flex items-center justify-center shadow-[0_0_8px_rgba(78,222,163,0.6)]">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col w-full bg-surface-container p-space-sm rounded gap-space-2xs shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[16px]">account_tree</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Impact Agent</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary bg-secondary/15 px-space-xs py-space-2xs rounded">DONE · 38ms</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Calculated blast radius: <span class="text-tertiary font-mono-code font-semibold">4 work orders</span> (WO-8821, 8824, 8830, 8845), 2 tier-1 customer SLA breaches threatened.</p>
+</div>
+</div>
+<!-- 3. Strategist Agent (Processing) -->
+<div class="relative flex items-start gap-space-sm pl-space-md">
+<div class="absolute -left-1 top-0.5 w-4 h-4 rounded-full bg-surface-container-high flex items-center justify-center shadow-[0_0_8px_rgba(76,215,246,0.8)]">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+</div>
+<div class="flex flex-col w-full bg-surface-container-high p-space-sm rounded gap-space-2xs shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[16px] animate-spin">memory</span>
+<span class="font-headline-sm text-headline-sm text-primary">Strategist Agent</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary bg-primary/20 px-space-xs py-space-2xs rounded animate-pulse">PROCESSING</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">Synthesizing 3 candidate recovery permutations via constraint propagation solver (84ms compute).</p>
+<!-- Progress bar -->
+<div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-space-2xs">
+<div class="bg-primary h-full rounded-full transition-all duration-300" style="width: 78%"></div>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant font-mono-code text-mono-code pt-space-2xs">
+<span>Branch tree #42</span>
+<span>78% complete</span>
+</div>
+</div>
+</div>
+<!-- 4. Oracle Agent -->
+<div class="relative flex items-start gap-space-sm pl-space-md">
+<div class="absolute -left-1 top-0.5 w-4 h-4 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col w-full bg-surface-container p-space-sm rounded gap-space-2xs shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[16px]">insights</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Oracle Agent</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary bg-secondary/15 px-space-xs py-space-2xs rounded">RECOMMENDED</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Simulated digital twin 10,000 runs: <span class="text-secondary font-semibold font-mono-code">Plan A yields 94.8% SLA confidence</span>, ₹42,000 risk reduction over baseline.</p>
+</div>
+</div>
+</div>
+<!-- Live Agent Compute Telemetry Box -->
+<div class="mt-space-2xs bg-surface-container-lowest p-space-sm rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">INFERENCE LATENCY</span>
+<span class="font-mono-metric-md text-mono-metric-md text-primary">142<span class="text-body-sm text-on-surface-variant">ms</span></span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CONSENSUS CONFIDENCE</span>
+<span class="font-mono-metric-md text-mono-metric-md text-secondary">98.4%</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ACTIVE TOKEN BURN</span>
+<span class="font-mono-code text-mono-code text-tertiary">2.4k tok/s</span>
+</div>
+<div class="w-full h-px bg-surface-container-high my-space-2xs"></div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SOLVER SEED</span>
+<span class="font-mono-code text-mono-code text-on-surface">#0x8F94B10C</span>
+</div>
+</div>
+</aside>
+<!-- ================= CENTER + RIGHT WORKSPACE (12 COLS) ================= -->
+<div class="xl:col-span-12 flex flex-col gap-space-md">
+<!-- ================= MAIN STAGE: GANTT CHART LIVE SCHEDULE ================= -->
+<section class="bg-surface-container-low p-space-md rounded shadow-sm flex flex-col gap-space-sm">
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">calendar_view_day</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wide">Autonomous Shop Floor Schedule</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Cell Pune-04 · Sub-minute Dispatch Timeline</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="flex items-center gap-space-2xs px-space-sm py-space-2xs bg-surface-container rounded">
+<span class="w-2.5 h-2.5 bg-error rounded-sm"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">FAULT CLASH</span>
+</div>
+<div class="flex items-center gap-space-2xs px-space-sm py-space-2xs bg-surface-container rounded">
+<span class="w-2.5 h-2.5 bg-secondary rounded-sm"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">REROUTED BY AI</span>
+</div>
+<div class="flex items-center gap-space-2xs px-space-sm py-space-2xs bg-surface-container rounded">
+<span class="w-2.5 h-2.5 bg-primary-container rounded-sm"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">NOMINAL</span>
+</div>
+</div>
+</div>
+<!-- Gantt Technical Timeline Canvas -->
+<div class="relative overflow-x-auto bg-surface-container-lowest rounded p-space-sm">
+<!-- Timeline Header Axis (08:00 - 20:00) -->
+<div class="grid grid-cols-12 text-center pb-space-xs font-mono-code text-mono-code text-on-surface-variant border-b border-surface-container-high ml-44">
+<div>08:00</div>
+<div>09:00</div>
+<div>10:00</div>
+<div>11:00</div>
+<div>12:00</div>
+<div>13:00</div>
+<div class="text-error font-semibold">14:00</div>
+<div>15:00</div>
+<div>16:00</div>
+<div>17:00</div>
+<div>18:00</div>
+<div>19:00</div>
+</div>
+<!-- Vertical Time Scrubber ("NOW 14:30") -->
+<div class="absolute top-10 bottom-2 pointer-events-none z-20 flex flex-col items-center" style="left: calc(11rem + 54.16%);">
+<span class="bg-error text-on-error font-label-caps text-[9px] px-space-2xs py-0.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.8)] uppercase">NOW 14:30</span>
+<div class="w-px h-full bg-error shadow-[0_0_6px_rgba(239,68,68,0.9)] animate-pulse"></div>
+</div>
+<!-- Machine Rows Container -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<!-- Row 1: CNC-01 (Milling) -->
+<div class="flex items-center h-10 group hover:bg-surface-container/50 rounded transition-colors">
+<div class="w-44 flex-shrink-0 flex items-center justify-between pr-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface font-semibold">CNC-01 <span class="text-on-surface-variant font-normal">(Milling)</span></span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="relative flex-1 h-7 bg-surface-container-low rounded overflow-hidden">
+<div class="absolute left-[5%] w-[40%] h-full bg-primary-container/40 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  WO-8819 [Batch 240/240]
+                </div>
+<div class="absolute left-[48%] w-[45%] h-full bg-primary-container/30 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  WO-8822 [Flange Milling]
+                </div>
+</div>
+</div>
+<!-- Row 2: CNC-02 (Turning - FAULT) -->
+<div class="flex items-center h-10 bg-error/5 rounded px-space-2xs">
+<div class="w-44 flex-shrink-0 flex items-center justify-between pr-space-sm">
+<span class="font-mono-data text-mono-data text-error font-bold flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                  CNC-02 <span class="text-error/80 font-normal">(FAULT)</span>
+</span>
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span>
+</div>
+<div class="relative flex-1 h-7 bg-surface-container-low rounded overflow-hidden">
+<div class="absolute left-[0%] w-[48%] h-full bg-surface-variant/40 rounded flex items-center px-space-xs text-on-surface-variant font-mono-code text-mono-code truncate">
+                  WO-8815 [Complete]
+                </div>
+<!-- Fault block -->
+<div class="absolute left-[50%] w-[35%] h-full bg-error text-on-error rounded flex items-center px-space-xs font-mono-code text-mono-code font-semibold shadow-[0_0_12px_rgba(239,68,68,0.5)] overflow-hidden">
+<span class="relative z-10 truncate">WO-8821 [CRITICAL CLASH - SPINDLE DOWN]</span>
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:8px_8px]"></div>
+</div>
+</div>
+</div>
+<!-- Row 3: CNC-03 (5-Axis High-Speed) -> RECEIVER OF REROUTE -->
+<div class="flex items-center h-10 bg-secondary/5 rounded px-space-2xs">
+<div class="w-44 flex-shrink-0 flex items-center justify-between pr-space-sm">
+<span class="font-mono-data text-mono-data text-secondary font-semibold">CNC-03 <span class="text-on-surface-variant font-normal">(5-Axis)</span></span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="relative flex-1 h-7 bg-surface-container-low rounded overflow-hidden">
+<div class="absolute left-[10%] w-[38%] h-full bg-primary-container/30 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  WO-8818 [Impeller Stage 1]
+                </div>
+<!-- Idle slot converted to Rerouted Task -->
+<div class="absolute left-[55%] w-[36%] h-full bg-secondary text-on-secondary rounded flex items-center px-space-xs font-mono-code text-mono-code font-bold shadow-[0_0_10px_rgba(78,222,163,0.4)] animate-pulse">
+<span class="truncate">WO-8821 [REROUTED BY STRATEGIST +45m]</span>
+</div>
+</div>
+</div>
+<!-- Row 4: EDM-01 (Wire Cut) -->
+<div class="flex items-center h-10 group hover:bg-surface-container/50 rounded transition-colors">
+<div class="w-44 flex-shrink-0 flex items-center justify-between pr-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface font-semibold">EDM-01 <span class="text-on-surface-variant font-normal">(Wire Cut)</span></span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="relative flex-1 h-7 bg-surface-container-low rounded overflow-hidden">
+<div class="absolute left-[20%] w-[50%] h-full bg-primary-container/40 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  WO-8820 [Nozzle Guide Vane Wire EDM]
+                </div>
+</div>
+</div>
+<!-- Row 5: ROBOT-CELL 04 (Welding) -->
+<div class="flex items-center h-10 group hover:bg-surface-container/50 rounded transition-colors">
+<div class="w-44 flex-shrink-0 flex items-center justify-between pr-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface font-semibold">ROBOT-CELL 04 <span class="text-on-surface-variant font-normal">(Weld)</span></span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="relative flex-1 h-7 bg-surface-container-low rounded overflow-hidden">
+<div class="absolute left-[0%] w-[35%] h-full bg-primary-container/40 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  WO-8812 [Laser Clad B-09]
+                </div>
+<div class="absolute left-[40%] w-[45%] h-full bg-primary-container/30 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  WO-8825 [Exhaust Casing TIG]
+                </div>
+</div>
+</div>
+<!-- Row 6: INSPECTION-02 (CMM) -->
+<div class="flex items-center h-10 group hover:bg-surface-container/50 rounded transition-colors">
+<div class="w-44 flex-shrink-0 flex items-center justify-between pr-space-sm">
+<span class="font-mono-data text-mono-data text-on-surface font-semibold">INSPECTION-02 <span class="text-on-surface-variant font-normal">(CMM)</span></span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="relative flex-1 h-7 bg-surface-container-low rounded overflow-hidden">
+<div class="absolute left-[15%] w-[25%] h-full bg-primary-container/30 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  QC-Check #411
+                </div>
+<div class="absolute left-[60%] w-[30%] h-full bg-primary-container/40 rounded flex items-center px-space-xs text-on-primary-container font-mono-code text-mono-code truncate">
+                  QC-Stage Gate 02
+                </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= DEPENDENCY GRAPH / BLAST RADIUS VISUALIZER ================= -->
+<section class="bg-surface-container-low p-space-md rounded shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">account_tree</span>
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wide">Blast Radius &amp; Reroute Topology</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Dependency cascade from raw supplier ingot to Airbus Defense delivery SLA</span>
+</div>
+</div>
+<!-- View switchers -->
+<div class="flex items-center bg-surface-container p-space-2xs rounded gap-space-2xs">
+<button class="px-space-sm py-space-2xs rounded bg-surface-container-high text-primary font-label-caps text-label-caps font-semibold shadow-sm" type="button">
+              CASCADE GRAPH
+            </button>
+<button class="px-space-sm py-space-2xs rounded text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps" type="button">
+              PHYSICAL DIGITAL TWIN
+            </button>
+</div>
+</div>
+<!-- Node & Edge Flow Canvas -->
+<div class="relative w-full bg-surface-container-lowest p-space-lg rounded overflow-x-auto flex flex-col gap-space-lg">
+<!-- Primary Disruption Cascade Line -->
+<div class="flex items-center justify-between min-w-[760px] relative">
+<!-- Connecting SVG background lines -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+<path class="text-secondary/40" d="M 120 40 L 220 40" stroke="currentColor" stroke-dasharray="4 2" stroke-width="2"></path>
+<path class="text-error" d="M 280 40 L 380 40" stroke="currentColor" stroke-width="2.5"></path>
+<path class="text-tertiary" d="M 460 40 L 540 40" stroke="currentColor" stroke-dasharray="3 3" stroke-width="2"></path>
+<path class="text-tertiary" d="M 620 40 L 700 40" stroke="currentColor" stroke-dasharray="3 3" stroke-width="2"></path>
+<path class="text-error" d="M 780 40 L 850 40" stroke="currentColor" stroke-width="2.5"></path>
+<!-- Autonomous bypass curved line to CNC-03 -->
+<path class="text-secondary" d="M 270 40 Q 320 110, 480 110" fill="none" stroke="currentColor" stroke-dasharray="6 3" stroke-width="2.5"></path>
+<path class="text-secondary" d="M 580 110 Q 640 110, 710 45" fill="none" stroke="currentColor" stroke-dasharray="6 3" stroke-width="2.5"></path>
+</svg>
+<!-- Node 1: Supplier -->
+<div class="relative z-10 flex flex-col items-center gap-space-2xs bg-surface-container p-space-sm rounded shadow-sm w-36 text-center">
+<span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_6px_rgba(78,222,163,0.8)]"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">SUPPLIER</span>
+<span class="font-mono-data text-mono-data text-on-surface font-semibold truncate w-full">Tata Steel Alloy</span>
+<span class="font-mono-code text-mono-code text-secondary">LOT-9921 [OK]</span>
+</div>
+<!-- Node 2: Raw Material -->
+<div class="relative z-10 flex flex-col items-center gap-space-2xs bg-surface-container p-space-sm rounded shadow-sm w-36 text-center">
+<span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_6px_rgba(78,222,163,0.8)]"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">BILLET STOCK</span>
+<span class="font-mono-data text-mono-data text-on-surface font-semibold truncate w-full">Ti-6Al-4V Billet</span>
+<span class="font-mono-code text-mono-code text-secondary">STOCKED (42u)</span>
+</div>
+<!-- Node 3: Fault Machine (CRITICAL) -->
+<div class="relative z-10 flex flex-col items-center gap-space-2xs bg-error-container p-space-sm rounded shadow-[0_0_16px_rgba(239,68,68,0.4)] w-40 text-center animate-pulse">
+<span class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(239,68,68,1)]"></span>
+<span class="font-label-caps text-label-caps text-on-error-container font-bold">PRIMARY BOTTLENECK</span>
+<span class="font-mono-data text-mono-data text-on-error-container font-bold truncate w-full">CNC-02 Spindle</span>
+<span class="font-mono-code text-mono-code text-on-error-container bg-error/30 px-space-2xs rounded">OVERHEAT 104°C</span>
+</div>
+<!-- Node 4: Operation Impacted -->
+<div class="relative z-10 flex flex-col items-center gap-space-2xs bg-surface-container p-space-sm rounded shadow-sm w-36 text-center">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_6px_rgba(255,185,95,0.8)]"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">OPERATION</span>
+<span class="font-mono-data text-mono-data text-tertiary font-semibold truncate w-full">OP-30 Rough Turn</span>
+<span class="font-mono-code text-mono-code text-tertiary">HALTED (+2.4h)</span>
+</div>
+<!-- Node 5: Work Order Impacted -->
+<div class="relative z-10 flex flex-col items-center gap-space-2xs bg-surface-container p-space-sm rounded shadow-sm w-36 text-center">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_6px_rgba(255,185,95,0.8)]"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ORDER AT RISK</span>
+<span class="font-mono-data text-mono-data text-tertiary font-semibold truncate w-full">WO-8821 Turbine</span>
+<span class="font-mono-code text-mono-code text-tertiary">4 UNITS HELD</span>
+</div>
+<!-- Node 6: Customer Delivery SLA -->
+<div class="relative z-10 flex flex-col items-center gap-space-2xs bg-surface-container-high p-space-sm rounded shadow-sm w-44 text-center">
+<span class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(239,68,68,0.9)]"></span>
+<span class="font-label-caps text-label-caps text-error font-bold">CONTRACT PENALTY</span>
+<span class="font-mono-data text-mono-data text-on-surface font-semibold truncate w-full">Airbus #PO-9912</span>
+<span class="font-mono-code text-mono-code text-error">SLA DUE 18:00 UTC</span>
+</div>
+</div>
+<!-- Active Reroute Sub-Branch (CNC-03) -->
+<div class="flex items-center ml-[280px] min-w-[500px] relative z-10">
+<div class="flex items-center gap-space-sm bg-surface-container p-space-sm rounded shadow-[0_0_12px_rgba(78,222,163,0.2)]">
+<div class="w-3 h-3 rounded-full bg-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-container-lowest text-[10px] font-bold">check</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps text-secondary font-bold uppercase">AUTONOMOUS MITIGATION BYPASS</span>
+<span class="font-mono-code text-mono-code text-on-surface-variant">· CNC-03 High-Speed Dynamic Buffer</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface">Rerouting WO-8821 rough milling stage to CNC-03 slot at 15:00 UTC. Penalty avoided: ₹85,000.</span>
+</div>
+<span class="font-mono-metric-md text-mono-metric-md text-secondary ml-space-md">94.8% SLA</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= BOTTOM SECTION: 3 SIDE-BY-SIDE RECOVERY PLANS ================= -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">recommend</span>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wide">Candidate Recovery Plans (AI Simulation Matrix)</span>
+</div>
+<span class="font-mono-code text-mono-code text-on-surface-variant">Constraint Engine: 10,000 Monte Carlo Iterations</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md items-stretch">
+<!-- Plan A: RECOMMENDED -->
+<div class="relative bg-surface-container p-space-md rounded shadow-md flex flex-col justify-between gap-space-md">
+<div class="absolute -top-2.5 left-space-md bg-secondary text-on-secondary font-label-caps text-[9px] px-space-sm py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-space-2xs shadow-[0_0_10px_rgba(78,222,163,0.5)]">
+<span class="material-symbols-outlined text-[12px]">auto_awesome</span>
+              AI RECOMMENDED · LOWEST RISK
+            </div>
+<div class="flex flex-col gap-space-xs pt-space-2xs">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block font-bold">Plan A: Dynamic Reroute</span>
+<span class="font-body-sm text-body-sm text-secondary">Reroute WO-8821 to CNC-03 buffer</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-surface-variant">INDEX</span>
+<span class="font-mono-metric-lg text-mono-metric-lg text-secondary">96.4</span>
+</div>
+</div>
+<!-- Metric Grid -->
+<div class="grid grid-cols-2 gap-space-xs bg-surface-container-low p-space-sm rounded my-space-xs">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">PROJECTED DELAY</span>
+<span class="font-mono-metric-md text-mono-metric-md text-secondary">+0.6 hrs</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">ADDED COST</span>
+<span class="font-mono-metric-md text-mono-metric-md text-on-surface">₹18,400</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">ORDERS SAVED</span>
+<span class="font-mono-metric-md text-mono-metric-md text-secondary">4/4 <span class="text-body-sm text-on-surface-variant font-normal">(100%)</span></span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">FLOOR UTIL</span>
+<span class="font-mono-metric-md text-mono-metric-md text-primary">91.2%</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Zero customer SLA breach. Minor retooling cost absorbed by Pune-04 shift contingency margin. High tool-match compatibility.
+              </p>
+</div>
+<button class="w-full py-space-sm px-space-md bg-secondary text-on-secondary rounded font-label-caps text-label-caps uppercase tracking-wider font-bold hover:bg-secondary-fixed transition-colors flex items-center justify-center gap-space-xs shadow-[0_0_12px_rgba(78,222,163,0.3)]" type="button">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+              Execute Plan Live
+            </button>
+</div>
+<!-- Plan B: Overtime -->
+<div class="relative bg-surface-container p-space-md rounded shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block font-bold">Plan B: Shift Overtime</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Speed bump &amp; extended crew shift</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-surface-variant">INDEX</span>
+<span class="font-mono-metric-lg text-mono-metric-lg text-tertiary">81.2</span>
+</div>
+</div>
+<!-- Metric Grid -->
+<div class="grid grid-cols-2 gap-space-xs bg-surface-container-low p-space-sm rounded my-space-xs">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">PROJECTED DELAY</span>
+<span class="font-mono-metric-md text-mono-metric-md text-tertiary">+1.8 hrs</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">ADDED COST</span>
+<span class="font-mono-metric-md text-mono-metric-md text-tertiary">₹64,000</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">ORDERS SAVED</span>
+<span class="font-mono-metric-md text-mono-metric-md text-on-surface">3/4 <span class="text-body-sm text-on-surface-variant font-normal">(75%)</span></span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">FLOOR UTIL</span>
+<span class="font-mono-metric-md text-mono-metric-md text-on-surface">98.5%</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Demands 3.5h overtime crew on cell #4. Retains Airbus WO-8821 but slips WO-8845 delivery by 1 shift. Thermal stress on CNC-01 increased.
+              </p>
+</div>
+<button class="w-full py-space-sm px-space-md bg-surface-container-high text-on-surface rounded font-label-caps text-label-caps uppercase tracking-wider font-semibold hover:bg-surface-variant transition-colors flex items-center justify-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[16px]">play_circle</span>
+              Simulate Secondary Run
+            </button>
+</div>
+<!-- Plan C: Buffer Stock Swap -->
+<div class="relative bg-surface-container p-space-md rounded shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block font-bold">Plan C: Stock Swap</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Buffer stock substitution &amp; deferral</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-surface-variant">INDEX</span>
+<span class="font-mono-metric-lg text-mono-metric-lg text-error">68.9</span>
+</div>
+</div>
+<!-- Metric Grid -->
+<div class="grid grid-cols-2 gap-space-xs bg-surface-container-low p-space-sm rounded my-space-xs">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">PROJECTED DELAY</span>
+<span class="font-mono-metric-md text-mono-metric-md text-error">+4.2 hrs</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">ADDED COST</span>
+<span class="font-mono-metric-md text-mono-metric-md text-error">₹112,000</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">ORDERS SAVED</span>
+<span class="font-mono-metric-md text-mono-metric-md text-error">2/4 <span class="text-body-sm text-on-surface-variant font-normal">(50%)</span></span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block">FLOOR UTIL</span>
+<span class="font-mono-metric-md text-mono-metric-md text-on-surface">74.0%</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Depletes safety buffer stock for Tier-2 commercial orders. Incurs contract delay penalty on secondary client #PO-4091.
+              </p>
+</div>
+<button class="w-full py-space-sm px-space-md bg-surface-container-high text-on-surface rounded font-label-caps text-label-caps uppercase tracking-wider font-semibold hover:bg-surface-variant transition-colors flex items-center justify-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[16px]">play_circle</span>
+              Simulate Secondary Run
+            </button>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- ================= FLOATING MISSION CONTROL FACTORY CO-PILOT CHAT ================= -->
+<aside class="fixed bottom-space-md right-space-md w-96 max-w-[calc(100vw-2rem)] bg-surface-container-low/95 backdrop-blur-md rounded shadow-2xl z-50 overflow-hidden flex flex-col" id="copilot-drawer">
+<!-- Co-Pilot Header -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">PULSE Co-Pilot</span>
+<span class="font-mono-code text-mono-code text-primary bg-primary/10 px-space-2xs rounded">AUTONOMOUS REASONING</span>
+</div>
+<div class="flex items-center gap-space-2xs">
+<button class="text-on-surface-variant hover:text-on-surface p-space-2xs" onclick="document.getElementById('copilot-drawer-body').classList.toggle('hidden')" type="button">
+<span class="material-symbols-outlined text-[18px]">unfold_more</span>
+</button>
+</div>
+</div>
+<!-- Co-Pilot Collapsible Content -->
+<div class="flex flex-col p-space-sm gap-space-sm max-h-[380px] overflow-y-auto" id="copilot-drawer-body">
+<!-- Grounded Conversation Log -->
+<div class="flex flex-col gap-space-xs">
+<!-- User Query -->
+<div class="flex justify-end">
+<div class="bg-primary-container text-on-primary-container px-space-sm py-space-xs rounded-xl rounded-tr-none max-w-[85%] font-body-sm text-body-sm shadow-sm">
+            Why was Plan A recommended over Plan B?
+          </div>
+</div>
+<!-- AI Response -->
+<div class="flex items-start gap-space-xs">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-on-primary text-[14px]">smart_toy</span>
+</div>
+<div class="bg-surface-container px-space-sm py-space-xs rounded-xl rounded-tl-none max-w-[90%] font-body-sm text-body-sm text-on-surface flex flex-col gap-space-2xs shadow-sm">
+<p>
+              Plan A preserves <span class="text-secondary font-semibold font-mono-code">100% SLA compliance</span> for Airbus #PO-9912 by utilizing an existing 3.5h idle spindle slot on CNC-03 (15:00-18:30 UTC).
+            </p>
+<p class="text-on-surface-variant">
+              In comparison, Plan B forces ₹45,600 additional overtime overhead and introduces high thermal fatigue risk on Tool #4.
+            </p>
+<!-- Citation Pills -->
+<div class="flex flex-wrap gap-space-2xs pt-space-2xs">
+<span class="bg-surface-container-high px-space-2xs py-0.5 rounded font-mono-code text-[10px] text-primary">
+                [Ref: Telemetry CNC-03: 42% idle]
+              </span>
+<span class="bg-surface-container-high px-space-2xs py-0.5 rounded font-mono-code text-[10px] text-tertiary">
+                [Ref: Contract SLA Penalty Table §4.2]
+              </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Prompt Suggestion Chips -->
+<div class="flex flex-col gap-space-2xs pt-space-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">RECOMMENDED QUERIES</span>
+<div class="flex flex-wrap gap-space-2xs">
+<button class="text-left font-body-sm text-body-sm bg-surface-container hover:bg-surface-container-high px-space-xs py-1 rounded text-on-surface transition-colors truncate max-w-full" type="button">
+            Show CNC-03 spindle tool wear delta
+          </button>
+<button class="text-left font-body-sm text-body-sm bg-surface-container hover:bg-surface-container-high px-space-xs py-1 rounded text-on-surface transition-colors truncate max-w-full" type="button">
+            Financial penalty if delayed &gt; 2 hrs?
+          </button>
+</div>
+</div>
+<!-- Prompt Input -->
+<div class="flex items-center gap-space-xs pt-space-2xs bg-surface-container-low">
+<input class="flex-1 bg-surface-container px-space-sm py-space-xs rounded font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Inquire agent decision audit log..." type="text"/>
+<button class="p-space-xs bg-primary text-on-primary rounded hover:bg-primary-fixed-dim transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[16px]">send</span>
+</button>
+</div>
+</div>
+</aside>
+</div>
+<script>
+  // Simple micro-interaction for scenario simulation buttons and live trigger switches
+  document.addEventListener('DOMContentLoaded', () => {
+    const scenarioButtons = document.querySelectorAll('header button');
+    scenarioButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        scenarioButtons.forEach(b => b.classList.remove('ring-1', 'ring-primary'));
+        btn.classList.add('ring-1', 'ring-primary');
+      });
+    });
+  });
+</script></main></div></body></html>

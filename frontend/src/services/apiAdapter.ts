@@ -27,27 +27,45 @@ export function adaptMachines(rawMachines: any[] = [], rawSchedule: any[] = []):
   return rawMachines.map((m) => {
     const isOffline = m.status === 'offline' || m.status === 'failed';
     const isRepairing = m.status === 'repairing' || m.status === 'backup_rerouted';
+    const isMaintenance = m.status === 'maintenance';
+    const isIdle = m.status === 'idle';
 
     let status: MachineState['status'] = 'operational';
     if (isOffline) status = 'failed';
     else if (isRepairing) status = 'degraded';
-    else if (m.status === 'maintenance') status = 'maintenance';
+    else if (isMaintenance) status = 'maintenance';
+    else if (isIdle) status = 'idle';
 
-    // Count scheduled tasks on this machine
+    // Count scheduled tasks on this machine or use configured utilization
     const taskCount = rawSchedule.filter((s) => s.resource_id === m.id).length;
-    let utilization = isOffline ? 0 : Math.min(95, Math.max(50, taskCount * 22));
+    let utilization = isOffline ? 0 : (m.current_utilization ?? m.utilization ?? Math.min(95, Math.max(50, taskCount * 22)));
+
+    // Department inference fallback
+    const dept = m.department || (
+      m.type?.includes('Assembly') ? 'Assembly' :
+      m.type?.includes('Finishing') ? 'Finishing' :
+      m.type?.includes('Inspection') || m.type?.includes('Quality') ? 'Quality Control' :
+      m.type?.includes('Packaging') ? 'Packaging' : 'Precision Machining'
+    );
 
     return {
       id: m.id,
       name: m.name || m.id,
-      type: m.type || 'CNC',
+      type: m.type || 'CNC Machine',
+      department: dept,
       status,
       capacity_per_hour: m.capacity_per_hour || 30,
       current_utilization: utilization,
       max_utilization: 100,
       operating_cost_per_hour: 1800,
       overtime_cost_per_hour: m.overtime_cost_per_hour || 2000,
+      overtime_available: m.overtime_available ?? true,
       supported_operations: m.supported_products?.map((p: string) => `PROD_${p}`) || ['CNC_MACHINING'],
+      capabilities: m.capabilities || [],
+      supported_products: m.supported_products || [],
+      notes: m.notes,
+      strategic_importance: m.strategic_importance || 'high',
+      is_custom: m.is_custom ?? false,
     };
   });
 }
