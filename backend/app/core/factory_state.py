@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from copy import deepcopy
 from datetime import datetime
+from typing import List, Dict, Any, Tuple
 
 
 class FactoryState:
@@ -10,14 +11,23 @@ class FactoryState:
         self.app_dir = Path(__file__).resolve().parent.parent
         self.data_dir = self.app_dir / "data"
         self.custom_machines_file = self.data_dir / "custom_machines.json"
+        self.custom_orders_file = self.data_dir / "custom_orders.json"
+        self.custom_schedule_file = self.data_dir / "custom_schedule.json"
 
-        # Load factory data
+        # Load factory baseline data
         self.baseline_machines = self._load_json("machines.json")
         self.custom_machines = self._load_custom_machines()
         self.machines = deepcopy(self.baseline_machines) + deepcopy(self.custom_machines)
+
         self.materials = self._load_json("materials.json")
-        self.orders = self._load_json("orders.json")
-        self.schedule = self._load_json("schedule.json")
+
+        self.baseline_orders = self._load_json("orders.json")
+        self.custom_orders = self._load_custom_orders()
+        self.orders = deepcopy(self.baseline_orders) + deepcopy(self.custom_orders)
+
+        self.baseline_schedule = self._load_json("schedule.json")
+        self.custom_schedule = self._load_custom_schedule()
+        self.schedule = deepcopy(self.baseline_schedule) + deepcopy(self.custom_schedule)
 
         # Dynamic factory state
         self.active_events = []
@@ -27,8 +37,17 @@ class FactoryState:
         self.recovery_plans = []
         self.resolutions = []
 
-        # Keep original state for reset functionality
+        # Keep original baseline state for reset functionality
         self.initial_state = self._create_snapshot()
+
+    # ----------------------------------------------------
+    # PERSISTENCE HELPERS
+    # ----------------------------------------------------
+    def _load_json(self, filename: str) -> list:
+        """Load a JSON file from the data directory."""
+        file_path = self.data_dir / filename
+        with open(file_path, "r", encoding="utf-8") as file:
+            return json.load(file)
 
     def _load_custom_machines(self) -> list:
         """Safely load user-added custom workstations."""
@@ -49,21 +68,56 @@ class FactoryState:
         except Exception as e:
             print(f"Warning: Failed to persist custom machines: {e}")
 
-    def _load_json(self, filename):
-        """Load a JSON file from the data directory."""
-        file_path = self.data_dir / filename
-        with open(file_path, "r", encoding="utf-8") as file:
-            return json.load(file)
+    def _load_custom_orders(self) -> list:
+        """Safely load user-imported orders."""
+        if not self.custom_orders_file.exists():
+            return []
+        try:
+            with open(self.custom_orders_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except Exception:
+            return []
+
+    def _save_custom_orders(self):
+        """Safely write user-imported orders to persistent storage."""
+        try:
+            with open(self.custom_orders_file, "w", encoding="utf-8") as f:
+                json.dump(self.custom_orders, f, indent=4)
+        except Exception as e:
+            print(f"Warning: Failed to persist custom orders: {e}")
+
+    def _load_custom_schedule(self) -> list:
+        """Safely load user-imported schedule tasks."""
+        if not self.custom_schedule_file.exists():
+            return []
+        try:
+            with open(self.custom_schedule_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except Exception:
+            return []
+
+    def _save_custom_schedule(self):
+        """Safely write user-imported schedule tasks to persistent storage."""
+        try:
+            with open(self.custom_schedule_file, "w", encoding="utf-8") as f:
+                json.dump(self.custom_schedule, f, indent=4)
+        except Exception as e:
+            print(f"Warning: Failed to persist custom schedule: {e}")
 
     def _create_snapshot(self):
-        """Create a copy of the original factory state."""
+        """Create a copy of the original factory baseline state."""
         return {
-            "machines": deepcopy(self.machines),
+            "machines": deepcopy(self.baseline_machines),
             "materials": deepcopy(self.materials),
-            "orders": deepcopy(self.orders),
-            "schedule": deepcopy(self.schedule)
+            "orders": deepcopy(self.baseline_orders),
+            "schedule": deepcopy(self.baseline_schedule)
         }
 
+    # ----------------------------------------------------
+    # FACTORY STATE QUERIES
+    # ----------------------------------------------------
     def get_state(self):
         """Return the complete current factory state."""
         from app.engines.pulse_engine import PulseEngine
@@ -97,6 +151,9 @@ class FactoryState:
                 return order
         return None
 
+    # ----------------------------------------------------
+    # EVENTS & INCIDENTS
+    # ----------------------------------------------------
     def add_event(self, event_data: dict):
         """Register an event in factory state, updating affected entities."""
         event_id = event_data.get("event_id", f"EVT-{len(self.event_history) + 1:03d}")
@@ -235,6 +292,9 @@ class FactoryState:
             "pulse": new_pulse.model_dump() if hasattr(new_pulse, "model_dump") else new_pulse
         }
 
+    # ----------------------------------------------------
+    # SINGLE MACHINE CRUD
+    # ----------------------------------------------------
     def add_machine(self, machine_data: dict) -> dict:
         """Add a new workstation / machine to factory state and persist it."""
         m_id = (machine_data.get("id") or "").strip().upper()
@@ -263,7 +323,6 @@ class FactoryState:
                 supported_products = ["AX-100", "AX-200"]
             machine_data["supported_products"] = supported_products
 
-        # Build clean machine record
         new_machine = {
             "id": m_id,
             "name": m_name,
@@ -294,7 +353,6 @@ class FactoryState:
         if not machine:
             raise ValueError(f"Machine with ID '{machine_id}' not found.")
 
-        # Update fields
         for key, val in updates.items():
             if val is not None and key != "id":
                 if key == "status":
@@ -309,7 +367,6 @@ class FactoryState:
                 else:
                     machine[key] = val
 
-        # If it's a custom machine, update in custom_machines list and persist
         for cm in self.custom_machines:
             if cm["id"] == machine_id:
                 cm.update(machine)
@@ -324,18 +381,15 @@ class FactoryState:
         if not machine:
             raise ValueError(f"Machine with ID '{machine_id}' not found.")
 
-        # Check if active schedule relies on this machine
         scheduled_tasks = [t for t in self.schedule if t.get("resource_id") == machine_id]
         if scheduled_tasks:
             task_ids = ", ".join([t.get("id") for t in scheduled_tasks[:3]])
             raise ValueError(f"Cannot delete machine '{machine_id}': it is currently allocated to scheduled task(s) [{task_ids}].")
 
-        # Disallow deleting core baseline machines needed by core system
         baseline_ids = {m["id"] for m in self.baseline_machines}
         if machine_id in baseline_ids:
             raise ValueError(f"Cannot delete core baseline machine '{machine_id}'. Only custom added workstations can be deleted.")
 
-        # Remove from state
         self.machines = [m for m in self.machines if m["id"] != machine_id]
         self.custom_machines = [m for m in self.custom_machines if m["id"] != machine_id]
         self._save_custom_machines()
@@ -346,31 +400,240 @@ class FactoryState:
             "machine_id": machine_id
         }
 
+    # ----------------------------------------------------
+    # BATCH IMPORT METHODS & DUPLICATE RESOLUTION
+    # ----------------------------------------------------
+    def import_machines(self, records: List[dict], strategy: str = "skip") -> Tuple[int, int, int]:
+        """
+        Batch import machine records with duplicate strategy ('skip', 'update', 'reject').
+        Returns (added_count, updated_count, skipped_count).
+        """
+        added = 0
+        updated = 0
+        skipped = 0
+
+        existing_map = {m["id"].upper(): m for m in self.machines}
+
+        # Validate reject strategy upfront
+        if strategy == "reject":
+            for r in records:
+                m_id = r["id"].upper()
+                if m_id in existing_map:
+                    raise ValueError(f"Import rejected: Machine '{m_id}' already exists in factory system.")
+
+        for r in records:
+            m_id = r["id"].upper()
+            clean_rec = dict(r)
+            clean_rec.pop("is_existing", None)
+            clean_rec["is_custom"] = True
+
+            if m_id in existing_map:
+                if strategy == "skip":
+                    skipped += 1
+                    continue
+                elif strategy == "update":
+                    # Update in machines list
+                    existing = existing_map[m_id]
+                    existing.update(clean_rec)
+
+                    # If in custom_machines, update there too
+                    for cm in self.custom_machines:
+                        if cm["id"].upper() == m_id:
+                            cm.update(clean_rec)
+                            break
+                    else:
+                        # If it was in baseline, add updated copy to custom machines
+                        self.custom_machines.append(clean_rec)
+
+                    updated += 1
+            else:
+                self.custom_machines.append(clean_rec)
+                self.machines.append(clean_rec)
+                existing_map[m_id] = clean_rec
+                added += 1
+
+        self._save_custom_machines()
+        return added, updated, skipped
+
+    def import_orders(self, records: List[dict], strategy: str = "skip") -> Tuple[int, int, int]:
+        """
+        Batch import orders with duplicate strategy ('skip', 'update', 'reject').
+        Returns (added_count, updated_count, skipped_count).
+        """
+        added = 0
+        updated = 0
+        skipped = 0
+
+        existing_map = {o["id"].upper(): o for o in self.orders}
+
+        if strategy == "reject":
+            for r in records:
+                o_id = r["id"].upper()
+                if o_id in existing_map:
+                    raise ValueError(f"Import rejected: Order '{o_id}' already exists in factory system.")
+
+        for r in records:
+            o_id = r["id"].upper()
+            clean_rec = dict(r)
+            clean_rec.pop("is_existing", None)
+            clean_rec["is_custom"] = True
+
+            if o_id in existing_map:
+                if strategy == "skip":
+                    skipped += 1
+                    continue
+                elif strategy == "update":
+                    existing = existing_map[o_id]
+                    existing.update(clean_rec)
+
+                    for co in self.custom_orders:
+                        if co["id"].upper() == o_id:
+                            co.update(clean_rec)
+                            break
+                    else:
+                        self.custom_orders.append(clean_rec)
+
+                    updated += 1
+            else:
+                self.custom_orders.append(clean_rec)
+                self.orders.append(clean_rec)
+                existing_map[o_id] = clean_rec
+                added += 1
+
+        self._save_custom_orders()
+        return added, updated, skipped
+
+    def import_schedule(self, records: List[dict], strategy: str = "skip") -> Tuple[int, int, int]:
+        """
+        Batch import schedule tasks with duplicate strategy ('skip', 'update', 'reject').
+        Returns (added_count, updated_count, skipped_count).
+        """
+        added = 0
+        updated = 0
+        skipped = 0
+
+        existing_map = {s["id"].upper(): s for s in self.schedule}
+
+        if strategy == "reject":
+            for r in records:
+                s_id = r["id"].upper()
+                if s_id in existing_map:
+                    raise ValueError(f"Import rejected: Schedule task '{s_id}' already exists.")
+
+        for r in records:
+            s_id = r["id"].upper()
+            clean_rec = dict(r)
+            clean_rec.pop("is_existing", None)
+            clean_rec["is_custom"] = True
+
+            if s_id in existing_map:
+                if strategy == "skip":
+                    skipped += 1
+                    continue
+                elif strategy == "update":
+                    existing = existing_map[s_id]
+                    existing.update(clean_rec)
+
+                    for cs in self.custom_schedule:
+                        if cs["id"].upper() == s_id:
+                            cs.update(clean_rec)
+                            break
+                    else:
+                        self.custom_schedule.append(clean_rec)
+
+                    updated += 1
+            else:
+                self.custom_schedule.append(clean_rec)
+                self.schedule.append(clean_rec)
+                existing_map[s_id] = clean_rec
+                added += 1
+
+        self._save_custom_schedule()
+        return added, updated, skipped
+
+    def import_complete_dataset(
+        self,
+        machines: List[dict] = None,
+        orders: List[dict] = None,
+        schedule: List[dict] = None,
+        strategy: str = "skip"
+    ) -> Dict[str, Any]:
+        """
+        Import complete factory dataset and update the intelligence model.
+        """
+        m_add, m_up, m_sk = 0, 0, 0
+        o_add, o_up, o_sk = 0, 0, 0
+        s_add, s_up, s_sk = 0, 0, 0
+
+        if machines:
+            m_add, m_up, m_sk = self.import_machines(machines, strategy=strategy)
+        if orders:
+            o_add, o_up, o_sk = self.import_orders(orders, strategy=strategy)
+        if schedule:
+            s_add, s_up, s_sk = self.import_schedule(schedule, strategy=strategy)
+
+        from app.engines.pulse_engine import PulseEngine
+        pulse = PulseEngine(self).calculate_pulse()
+
+        return {
+            "machines": {"added": m_add, "updated": m_up, "skipped": m_sk},
+            "orders": {"added": o_add, "updated": o_up, "skipped": o_sk},
+            "schedule": {"added": s_add, "updated": s_up, "skipped": s_sk},
+            "pulse": pulse.model_dump() if hasattr(pulse, "model_dump") else pulse
+        }
+
+    # ----------------------------------------------------
+    # RESET & RESTORATION
+    # ----------------------------------------------------
     def reset(self, hard_reset: bool = False):
         """
         Reset factory operational state.
-        Option B (Default): Clears active disruptions, resets machine operational statuses,
-        and restores schedule while preserving user-added custom workstations.
-        If hard_reset=True: Wipes custom machines and restores pure 7-machine baseline.
+        Default (hard_reset=False): Clears active disruptions/alerts/plans, resets machine
+        operational statuses, and restores nominal schedule while safely preserving user-imported
+        custom workstations, orders, and schedule tasks.
+        Hard Reset (hard_reset=True): Wipes all custom data and restores pure baseline.
         """
         if hard_reset:
             self.custom_machines = []
             self._save_custom_machines()
+            self.custom_orders = []
+            self._save_custom_orders()
+            self.custom_schedule = []
+            self._save_custom_schedule()
+
             self.machines = deepcopy(self.baseline_machines)
+            self.orders = deepcopy(self.baseline_orders)
+            self.schedule = deepcopy(self.baseline_schedule)
         else:
-            base = deepcopy(self.baseline_machines)
-            customs = deepcopy(self.custom_machines)
-            for m in customs:
+            base_m = deepcopy(self.baseline_machines)
+            cust_m = deepcopy(self.custom_machines)
+            for m in cust_m:
                 if m.get("status") in ("offline", "failed", "degraded"):
                     m["status"] = "operational"
                 m["overtime_active"] = False
-            for m in base:
+            for m in base_m:
                 m["overtime_active"] = False
-            self.machines = base + customs
+            self.machines = base_m + cust_m
+
+            base_o = deepcopy(self.baseline_orders)
+            cust_o = deepcopy(self.custom_orders)
+            for o in cust_o:
+                o["risk_status"] = "none"
+                o["status"] = "scheduled"
+            for o in base_o:
+                o["risk_status"] = "none"
+                o["status"] = "scheduled"
+            self.orders = base_o + cust_o
+
+            base_s = deepcopy(self.baseline_schedule)
+            cust_s = deepcopy(self.custom_schedule)
+            for s in cust_s:
+                s["status"] = "scheduled"
+            for s in base_s:
+                s["status"] = "scheduled"
+            self.schedule = base_s + cust_s
 
         self.materials = deepcopy(self.initial_state["materials"])
-        self.orders = deepcopy(self.initial_state["orders"])
-        self.schedule = deepcopy(self.initial_state["schedule"])
 
         self.active_events = []
         self.event_history = []

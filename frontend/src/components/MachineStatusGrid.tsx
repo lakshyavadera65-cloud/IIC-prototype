@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { MachineState } from '../types';
-import { Cpu, Plus, CheckCircle2, ShieldAlert, Wrench, Clock, Trash2, PowerOff, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Cpu, Plus, CheckCircle2, ShieldAlert, Wrench, Clock, Trash2, PowerOff, ShieldCheck, AlertTriangle, Upload } from 'lucide-react';
 
 interface MachineStatusGridProps {
   machines: MachineState[];
   activeDisruptedEntity?: string;
   onOpenAddModal?: () => void;
+  onOpenImportModal?: () => void;
   onStatusChange?: (machineId: string, status: string) => Promise<void>;
   onDeleteMachine?: (machineId: string) => Promise<void>;
 }
@@ -14,6 +15,7 @@ export const MachineStatusGrid: React.FC<MachineStatusGridProps> = ({
   machines,
   activeDisruptedEntity,
   onOpenAddModal,
+  onOpenImportModal,
   onStatusChange,
   onDeleteMachine,
 }) => {
@@ -77,6 +79,17 @@ export const MachineStatusGrid: React.FC<MachineStatusGridProps> = ({
           <span className="text-xs font-mono text-on-surface-variant bg-surface-container-lowest px-2.5 py-1 rounded border border-outline-variant/30">
             {machines.length} Total Workstations
           </span>
+          {onOpenImportModal && (
+            <button
+              onClick={onOpenImportModal}
+              id="btn-import-factory-data"
+              className="flex items-center gap-1.5 px-3 py-1 rounded bg-surface-container-high border border-primary/40 text-primary font-mono text-xs font-bold hover:bg-primary/20 transition-all cursor-pointer shadow-sm"
+              title="Upload CSV or Excel file to batch import machines, orders, and schedules"
+            >
+              <Upload className="h-3.5 w-3.5 text-primary" />
+              <span>Import Factory Data</span>
+            </button>
+          )}
           {onOpenAddModal && (
             <button
               onClick={onOpenAddModal}

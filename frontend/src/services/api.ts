@@ -1,4 +1,12 @@
-import { FactoryState, PipelineResult, MachineFormData } from '../types';
+import {
+  FactoryState,
+  PipelineResult,
+  MachineFormData,
+  ImportScope,
+  DuplicateStrategy,
+  ImportPreviewResponse,
+  ImportConfirmResponse,
+} from '../types';
 import {
   adaptBackendStateToFrontend,
   adaptBackendPipelineToFrontend,
@@ -13,11 +21,14 @@ let cachedPipelineResult: PipelineResult | null = null;
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   
-  const headers = {
-    'Content-Type': 'application/json',
+  const headers: Record<string, string> = {
     Accept: 'application/json',
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string> || {}),
   };
+
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   try {
     const response = await fetch(url, {
@@ -181,3 +192,46 @@ export async function fetchAlerts(): Promise<any[]> {
 export async function fetchPulse(): Promise<any> {
   return request('/api/pulse');
 }
+
+/**
+ * Preview factory data import from CSV or Excel file.
+ */
+export async function previewImportData(
+  file: File,
+  importType: ImportScope
+): Promise<ImportPreviewResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('import_type', importType);
+
+  return request<ImportPreviewResponse>('/api/import/preview', {
+    method: 'POST',
+    body: formData,
+  });
+}
+
+/**
+ * Confirm and commit validated factory data import.
+ */
+export async function confirmImportData(
+  importType: ImportScope,
+  duplicateStrategy: DuplicateStrategy,
+  data: Record<string, any[]>
+): Promise<ImportConfirmResponse> {
+  return request<ImportConfirmResponse>('/api/import/confirm', {
+    method: 'POST',
+    body: JSON.stringify({
+      import_type: importType,
+      duplicate_strategy: duplicateStrategy,
+      data,
+    }),
+  });
+}
+
+/**
+ * Get direct download URL for template files.
+ */
+export function getTemplateDownloadUrl(importType: ImportScope, format: 'csv' | 'xlsx'): string {
+  return `${API_BASE_URL}/api/import/templates/${encodeURIComponent(importType)}?format=${format}`;
+}
+

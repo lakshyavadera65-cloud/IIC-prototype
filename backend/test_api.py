@@ -82,6 +82,36 @@ def test_api_routes():
     assert event_res["event"]["event_type"] == "machine_failure"
     print(f"  [OK] /api/events (Raw alert) -> Event: {event_res['event_id']}, Type: {event_res['event']['event_type']}")
 
+    print("\n--- Testing Import Factory Data Endpoints ---")
+    from app.api.import_data import confirm_import, download_template
+    from app.models.import_model import ImportConfirmRequest, ImportType, DuplicateStrategy
+
+    confirm_req = ImportConfirmRequest(
+        import_type=ImportType.MACHINES,
+        duplicate_strategy=DuplicateStrategy.SKIP,
+        data={
+            "machines": [
+                {
+                    "id": "CNC-99",
+                    "name": "API Imported Workstation CNC-99",
+                    "type": "Precision CNC",
+                    "department": "Precision Machining",
+                    "status": "operational",
+                    "capacity_per_hour": 55,
+                    "capabilities": ["Milling", "Drilling"]
+                }
+            ]
+        }
+    )
+    conf_res = confirm_import(confirm_req)
+    assert conf_res.status == "success"
+    assert conf_res.machines_added == 1
+    print(f"  [OK] /api/import/confirm -> {conf_res.message}")
+
+    template_res = download_template("complete_factory", "csv")
+    assert template_res.status_code == 200
+    print(f"  [OK] /api/import/templates/complete_factory -> Downloadable CSV template verified")
+
     print("\n=================================================================")
     print("ALL ROUTE FUNCTIONS VERIFIED AND PASSING SUCCESSFULLY!")
     print("=================================================================")

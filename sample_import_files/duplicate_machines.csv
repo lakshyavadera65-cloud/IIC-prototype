@@ -1,0 +1,4 @@
+machine_id,machine_name,machine_type,capacity
+CNC-02,CNC Machine 02 Clash,Precision CNC,40
+CNC-99,First Instance,CNC Machine,25
+CNC-99,Second Instance In File,CNC Machine,25

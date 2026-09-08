@@ -6,6 +6,7 @@ from app.api.events import router as events_router
 from app.api.intelligence import router as intelligence_router
 from app.api.recovery import router as recovery_router
 from app.api.chat import router as chat_router
+from app.api.import_data import router as import_router
 
 
 app = FastAPI(
@@ -29,6 +30,7 @@ app.include_router(events_router)
 app.include_router(intelligence_router)
 app.include_router(recovery_router)
 app.include_router(chat_router)
+app.include_router(import_router)
 
 
 @app.get("/")

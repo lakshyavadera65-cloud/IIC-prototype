@@ -11,12 +11,14 @@ interface CockpitSidebarProps {
   activeTab: CockpitTab;
   onTabChange: (tab: CockpitTab) => void;
   activeDisruptionCount?: number;
+  onOpenImport?: () => void;
 }
 
 export const CockpitSidebar: React.FC<CockpitSidebarProps> = ({
   activeTab,
   onTabChange,
   activeDisruptionCount = 0,
+  onOpenImport,
 }) => {
   const navItems: Array<{ id: CockpitTab; label: string; icon: string; badge?: string | number }> = [
     { id: 'tactical-overview', label: 'Tactical Overview', icon: 'grid_view' },
@@ -86,6 +88,20 @@ export const CockpitSidebar: React.FC<CockpitSidebarProps> = ({
             );
           })}
         </nav>
+
+        {onOpenImport && (
+          <div className="px-space-md pt-1">
+            <button
+              type="button"
+              onClick={onOpenImport}
+              id="sidebar-import-btn"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-surface-container hover:bg-surface-container-high border border-primary/40 text-primary hover:text-on-surface font-mono text-xs font-bold transition shadow-sm cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
+              <span>Import Factory Data</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Bottom Telemetry Card */}

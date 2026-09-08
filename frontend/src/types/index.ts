@@ -198,3 +198,67 @@ export interface ChatMessage {
   citations?: string[];
   timestamp: string;
 }
+
+export type ImportScope = 'machines' | 'orders' | 'schedule' | 'complete_factory';
+export type DuplicateStrategy = 'skip' | 'update' | 'reject';
+
+export interface RowValidationError {
+  row: number;
+  sheet?: string;
+  entity_id?: string;
+  field?: string;
+  message: string;
+  severity: 'error' | 'warning';
+}
+
+export interface SheetPreview {
+  sheet_name: string;
+  detected: boolean;
+  record_count: number;
+  valid_count: number;
+  duplicate_count: number;
+  error_count: number;
+  warning_count: number;
+  sample_records: any[];
+}
+
+export interface ImportPreviewResponse {
+  status: string;
+  import_type: ImportScope;
+  file_name: string;
+  file_type: string;
+  total_detected: number;
+  valid_count: number;
+  duplicate_count: number;
+  error_count: number;
+  warning_count: number;
+  sheets_detected?: SheetPreview[];
+  sample_records: any[];
+  errors: RowValidationError[];
+  parsed_data: Record<string, any[]>;
+  can_import: boolean;
+}
+
+export interface ImportConfirmResponse {
+  status: string;
+  message: string;
+  import_type: ImportScope;
+  strategy_used: DuplicateStrategy;
+  machines_added: number;
+  machines_updated: number;
+  machines_skipped: number;
+  orders_added: number;
+  orders_updated: number;
+  orders_skipped: number;
+  schedule_added: number;
+  schedule_updated: number;
+  schedule_skipped: number;
+  pulse_score: number;
+  pulse_status: string;
+  summary: {
+    total_machines?: number;
+    total_orders?: number;
+    total_schedule_tasks?: number;
+    factory_pulse?: number;
+  };
+}

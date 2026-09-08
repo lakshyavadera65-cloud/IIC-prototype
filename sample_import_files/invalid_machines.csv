@@ -1,0 +1,3 @@
+machine_id,machine_name,machine_type,status,capacity
+CNC-91,Faulty Machine A,CNC Machine,EXPLODED,30
+CNC-92,Faulty Machine B,CNC Machine,OPERATIONAL,-15

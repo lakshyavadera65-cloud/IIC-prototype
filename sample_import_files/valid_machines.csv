@@ -1,0 +1,4 @@
+machine_id,machine_name,machine_type,department,status,capacity,capabilities,utilization,overtime_available,overtime_cost_per_hour
+CNC-03,Precision Machining Center 03,Precision CNC,Precision Machining,OPERATIONAL,50,Milling;Drilling;Gear Machining,65,True,2000
+CNC-04,Heavy-Duty Turning Lathe 04,CNC Lathe,Precision Machining,OPERATIONAL,40,Turning;Threading;Boring,70,True,1800
+ASM-C,Robotic Assembly Cell C,Assembly,Assembly,OPERATIONAL,30,Assembly;Fastening;Quality Inspection,75,True,2100

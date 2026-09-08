@@ -23,6 +23,7 @@ import { authService, UserProfile } from './services/authService';
 import { FactoryState, PipelineResult, MachineFormData } from './types';
 import { fetchFactoryState, resetFactory, triggerDisruption, executePlan, createMachine, updateMachine, deleteMachine } from './services/api';
 import { AddMachineModal } from './components/cockpit/AddMachineModal';
+import { ImportFactoryDataModal } from './components/cockpit/ImportFactoryDataModal';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 function AppContent() {
@@ -47,6 +48,7 @@ function AppContent() {
   const [isGraphOpen, setIsGraphOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(true);
   const [isAddMachineOpen, setIsAddMachineOpen] = useState<boolean>(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -165,6 +167,12 @@ function AppContent() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const handleImportSuccess = async (result: any) => {
+    await loadState();
+    setToastMessage(result.message || 'Factory data successfully ingested into digital twin.');
+    setTimeout(() => setToastMessage(null), 5000);
+  };
+
   const handleLoginSuccess = (user: UserProfile) => {
     setCurrentUser(user);
     navigate('/');
@@ -197,6 +205,7 @@ function AppContent() {
         activeTab={activeTab}
         onTabChange={(t) => setActiveTab(t)}
         activeDisruptionCount={activeDisruption ? 1 : 0}
+        onOpenImport={() => setIsImportModalOpen(true)}
       />
 
       {/* 2. Main Content Wrapper (pl-64 for sidebar offset) */}
@@ -289,6 +298,7 @@ function AppContent() {
                   machines={factoryState.machines}
                   activeDisruptedEntity={activeDisruption?.entity}
                   onOpenAddModal={() => setIsAddMachineOpen(true)}
+                  onOpenImportModal={() => setIsImportModalOpen(true)}
                   onStatusChange={handleMachineStatusChange}
                   onDeleteMachine={handleDeleteMachine}
                 />
@@ -360,6 +370,7 @@ function AppContent() {
                   machines={factoryState.machines}
                   activeDisruptedEntity={activeDisruption?.entity}
                   onOpenAddModal={() => setIsAddMachineOpen(true)}
+                  onOpenImportModal={() => setIsImportModalOpen(true)}
                   onStatusChange={handleMachineStatusChange}
                   onDeleteMachine={handleDeleteMachine}
                 />
@@ -407,6 +418,13 @@ function AppContent() {
         isOpen={isAddMachineOpen}
         onClose={() => setIsAddMachineOpen(false)}
         onSubmit={handleAddMachine}
+      />
+
+      {/* Import Factory Data Onboarding Modal */}
+      <ImportFactoryDataModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={handleImportSuccess}
       />
 
       {/* Floating Toast Notification */}
