@@ -947,8 +947,9 @@ export const ImportFactoryDataModal: React.FC<ImportFactoryDataModalProps> = ({
                   Updating Factory Intelligence Model...
                 </h3>
                 <p className="font-mono text-xs text-on-surface-variant max-w-sm">
-                  Rebuilding dynamic dependency graph, re-routing alternative workstations, and recalculating Factory Pulse.
+                  Rebuilding dynamic dependency graph, re-routing alternative workstations, and recalculating Factory Health.
                 </p>
+
               </div>
             </div>
           )}
@@ -1003,8 +1004,9 @@ export const ImportFactoryDataModal: React.FC<ImportFactoryDataModalProps> = ({
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-surface-container border border-outline-variant/30 flex flex-col">
-                  <span className="text-[10px] uppercase text-on-surface-variant">New Factory Pulse</span>
+                  <span className="text-[10px] uppercase text-on-surface-variant">Factory Health</span>
                   <span className="text-xl font-bold text-secondary">
+
                     {confirmResult.pulse_score.toFixed(1)}%
                   </span>
                   <span className="text-[10px] text-secondary font-bold uppercase mt-0.5">

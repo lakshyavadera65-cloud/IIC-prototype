@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PulseLogo } from '../branding/PulseLogo';
 import { UserProfile } from '../../services/authService';
+import { Bell, ChevronDown, Search, LogOut, RotateCcw, Play, CheckCircle2, MessageSquare } from 'lucide-react';
 
 interface CockpitHeaderProps {
-  healthScore: number;
   currentUser: UserProfile | null;
   onTriggerScenario: (text: string, scenarioId: string) => void;
   onResetFactory: () => void;
@@ -12,10 +12,12 @@ interface CockpitHeaderProps {
   isTriggering?: boolean;
   isResetting?: boolean;
   activeScenarioId?: string | null;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+  unreadAlertCount?: number;
 }
 
 export const CockpitHeader: React.FC<CockpitHeaderProps> = ({
-  healthScore,
   currentUser,
   onTriggerScenario,
   onResetFactory,
@@ -24,225 +26,226 @@ export const CockpitHeader: React.FC<CockpitHeaderProps> = ({
   isTriggering = false,
   isResetting = false,
   activeScenarioId = null,
+  searchQuery = '',
+  onSearchChange,
+  unreadAlertCount = 1,
 }) => {
-  // Live UTC Clock
-  const [utcTime, setUtcTime] = useState<string>('');
   const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const hours = String(now.getUTCHours()).padStart(2, '0');
-      const mins = String(now.getUTCMinutes()).padStart(2, '0');
-      const secs = String(now.getUTCSeconds()).padStart(2, '0');
-      setUtcTime(`${hours}:${mins}:${secs} UTC`);
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Gauge calculations
-  const normalizedHealth = Math.max(0, Math.min(100, healthScore));
-  const healthColor =
-    normalizedHealth >= 90
-      ? 'text-secondary stroke-secondary'
-      : normalizedHealth >= 70
-      ? 'text-tertiary stroke-tertiary'
-      : 'text-error stroke-error';
+  const [showSimMenu, setShowSimMenu] = useState<boolean>(false);
 
   return (
-    <header className="fixed top-0 left-64 right-0 z-40 bg-surface-container-low border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(0,0,0,0.5)] select-none">
-      <div className="h-16 w-full px-space-lg flex items-center justify-between gap-space-md">
-        {/* Left: Brand & Telemetry Badges */}
-        <div className="flex items-center gap-space-lg">
-          <PulseLogo size="sm" taglineText="Autonomous OS" />
+    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-[#070D17] border-b border-[#132238] px-6 flex items-center justify-between select-none">
+      {/* 1. Left: Brand Mark & Subtitle */}
+      <div className="flex items-center gap-6 shrink-0 min-w-[240px]">
+        <PulseLogo size="sm" showTagline={true} taglineText="Factory Operations Intelligence" />
+      </div>
 
-          <div className="hidden lg:block h-6 w-px bg-surface-variant" />
-
-          {/* Time & Factory Telemetry */}
-          <div className="hidden md:flex items-center gap-space-xs font-mono">
-            {/* UTC Clock */}
-            <div className="px-space-sm py-space-2xs bg-surface-container rounded flex items-center gap-space-xs border border-outline-variant/30">
-              <span className="material-symbols-outlined text-primary text-[14px]">schedule</span>
-              <span className="text-mono-code text-on-surface">{utcTime || '14:28:09 UTC'}</span>
-            </div>
-
-            {/* Cell Active Status */}
-            <div className="px-space-sm py-space-2xs bg-surface-container rounded flex items-center gap-space-xs border border-outline-variant/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-              <span className="text-label-caps text-on-surface-variant">PUNE-04:</span>
-              <span className="text-mono-code text-secondary font-semibold">ACTIVE AUTONOMOUS</span>
-            </div>
-
-            {/* Sensor Ingest Speed */}
-            <div className="hidden xl:flex px-space-sm py-space-2xs bg-surface-container rounded items-center gap-space-xs border border-outline-variant/30">
-              <span className="material-symbols-outlined text-on-surface-variant text-[14px]">sensors</span>
-              <span className="text-mono-code text-on-surface-variant">12.4k msg/s</span>
-            </div>
+      {/* 2. Center: Global Search Bar matching reference image */}
+      <div className="flex-1 max-w-xl mx-8 hidden md:block">
+        <div className="relative flex items-center">
+          <Search className="absolute left-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+            placeholder="Search machines, orders, or anything..."
+            className="w-full h-9 pl-10 pr-20 rounded-full bg-[#0B1320] border border-[#182840] text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#00F2FE] focus:ring-1 focus:ring-[#00F2FE]/40 transition"
+          />
+          <div className="absolute right-3 flex items-center gap-1 pointer-events-none">
+            <kbd className="text-[10px] font-mono text-slate-400 bg-[#132238] border border-[#1E3354] px-1.5 py-0.5 rounded">
+              Ctrl + K
+            </kbd>
           </div>
         </div>
+      </div>
 
-        {/* Right: Health Gauge, Scenario Triggers, Reset & Profile */}
-        <div className="flex items-center gap-space-md">
-          {/* Concentric Circular SVG Factory Health Gauge */}
-          <div className="flex items-center gap-space-sm px-space-md py-space-2xs bg-surface-container rounded border border-outline-variant/30 shadow-[0_0_12px_rgba(78,222,163,0.12)]">
-            <div className="relative flex items-center justify-center w-9 h-9">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                <path
-                  className="text-surface-container-high stroke-current"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  strokeWidth="3"
-                />
-                <path
-                  className={`${healthColor} transition-all duration-700`}
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  strokeDasharray={`${normalizedHealth}, 100`}
-                  strokeLinecap="square"
-                  strokeWidth="3"
-                />
-              </svg>
-              <span className="absolute font-mono text-[9px] text-secondary font-bold">
-                {Math.round(normalizedHealth)}%
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-mono text-[9px] text-on-surface-variant leading-none uppercase">
-                Factory Health
-              </span>
-              <span className={`font-mono text-mono-metric-md font-bold leading-tight ${healthColor}`}>
-                {normalizedHealth.toFixed(1)}%
-              </span>
-            </div>
-          </div>
-
-          {/* Quick Simulation Triggers */}
-          <div className="hidden sm:flex items-center gap-space-2xs bg-surface-container-lowest p-space-2xs rounded border border-outline-variant/30">
-            <button
-              type="button"
-              disabled={isTriggering}
-              onClick={() => onTriggerScenario('CNC-02 spindle gearbox failure with severe thermal vibration', 'SCENARIO_A')}
-              className={`px-space-sm py-space-2xs rounded transition-all flex items-center gap-space-2xs text-left ${
-                activeScenarioId === 'SCENARIO_A'
-                  ? 'bg-surface-container-high text-on-surface ring-1 ring-primary shadow-sm'
-                  : 'bg-surface-container hover:bg-surface-container-high hover:text-on-surface text-on-surface-variant'
-              }`}
-            >
-              <span className="font-mono text-label-caps bg-surface-container-high px-space-2xs py-0.5 rounded text-primary font-bold">
-                SIM-A
-              </span>
-              <span className="text-body-sm whitespace-nowrap">CNC-02 Failure</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isTriggering}
-              onClick={() => onTriggerScenario('Shipment delay on incoming Ti-6Al-4V titanium alloy billets', 'SCENARIO_B')}
-              className={`px-space-sm py-space-2xs rounded transition-all flex items-center gap-space-2xs text-left ${
-                activeScenarioId === 'SCENARIO_B'
-                  ? 'bg-surface-container-high text-on-surface ring-1 ring-tertiary shadow-sm'
-                  : 'bg-surface-container hover:bg-surface-container-high hover:text-on-surface text-on-surface-variant'
-              }`}
-            >
-              <span className="font-mono text-label-caps bg-surface-container-high px-space-2xs py-0.5 rounded text-tertiary font-bold">
-                SIM-B
-              </span>
-              <span className="text-body-sm whitespace-nowrap">Shipment Delay</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isTriggering}
-              onClick={() => onTriggerScenario('Critical inventory shortage: raw material depleted below safety buffer', 'SCENARIO_C')}
-              className={`px-space-sm py-space-2xs rounded transition-all flex items-center gap-space-2xs text-left ${
-                activeScenarioId === 'SCENARIO_C'
-                  ? 'bg-surface-container-high text-on-surface ring-1 ring-error shadow-sm'
-                  : 'bg-surface-container hover:bg-surface-container-high hover:text-on-surface text-on-surface-variant'
-              }`}
-            >
-              <span className="font-mono text-label-caps bg-surface-container-high px-space-2xs py-0.5 rounded text-error font-bold">
-                SIM-C
-              </span>
-              <span className="text-body-sm whitespace-nowrap">Inventory Shortage</span>
-            </button>
-          </div>
-
-          {/* Reset Factory Button */}
+      {/* 3. Right: Notifications, Factory Online Status, User Profile */}
+      <div className="flex items-center gap-3.5 shrink-0">
+        {/* Quick Simulation Trigger Dropdown */}
+        <div className="relative">
           <button
             type="button"
-            onClick={onResetFactory}
-            disabled={isResetting}
-            title="Reset Factory to initial nominal baseline"
-            className="flex items-center gap-space-xs px-space-sm py-space-2xs bg-error-container text-on-error-container rounded hover:bg-error hover:text-on-error transition-all shadow-[0_0_8px_rgba(255,180,171,0.2)] disabled:opacity-50 active:scale-95"
+            onClick={() => setShowSimMenu((prev) => !prev)}
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0B1320] border border-[#182840] hover:border-[#1E3557] text-xs text-slate-300 transition"
+            title="Simulate Disruption Scenarios"
           >
-            <span className={`material-symbols-outlined text-[16px] ${isResetting ? 'animate-spin' : ''}`}>
-              restart_alt
-            </span>
-            <span className="font-mono text-label-caps uppercase font-bold hidden md:inline">
-              Reset Factory
-            </span>
+            <Play className={`h-3 w-3 text-[#00F2FE] ${isTriggering ? 'animate-spin' : ''}`} />
+            <span className="font-medium text-[11px]">Simulate</span>
+            <ChevronDown className="h-3 w-3 text-slate-400" />
           </button>
 
-          {/* Co-Pilot Chat Toggle Button */}
-          {onToggleChat && (
-            <button
-              type="button"
-              onClick={onToggleChat}
-              title="Open Grounded Factory Intelligence Co-Pilot"
-              className="flex items-center gap-1.5 px-space-sm py-space-2xs bg-surface-container hover:bg-surface-container-high text-primary border border-primary/30 rounded transition-all active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[16px]">smart_toy</span>
-              <span className="font-mono text-label-caps uppercase font-bold hidden xl:inline">
-                Co-Pilot
-              </span>
-            </button>
-          )}
-
-          <div className="h-6 w-px bg-surface-variant" />
-
-          {/* Operator Profile / Sign Out Menu */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowProfileMenu((prev) => !prev)}
-              className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-mono font-bold text-xs shadow-sm hover:ring-2 hover:ring-primary/50 transition"
-              title={currentUser ? `${currentUser.name} (${currentUser.role})` : 'Operator Profile'}
-            >
-              {currentUser?.avatarInitials || 'OP'}
-            </button>
-
-            {/* Profile Dropdown */}
-            {showProfileMenu && (
-              <div className="absolute right-0 top-11 w-60 bg-surface-container border border-outline-variant/40 rounded shadow-2xl p-3 flex flex-col gap-2 z-50 animate-fade-in font-sans">
-                <div className="border-b border-outline-variant/30 pb-2">
-                  <div className="text-xs font-bold text-on-surface truncate">
-                    {currentUser?.name || 'Operator'}
-                  </div>
-                  <div className="text-[10px] text-primary truncate font-mono">
-                    {currentUser?.role || 'Plant Operations Director'}
-                  </div>
-                  <div className="text-[10px] text-on-surface-variant font-mono truncate mt-0.5">
-                    {currentUser?.clearanceLevel || 'Level 4: Full Autonomous Override'}
-                  </div>
+          {showSimMenu && (
+            <div className="absolute right-0 top-10 w-72 bg-[#0B1320] border border-[#182840] rounded-lg shadow-2xl p-2 z-50 animate-fade-in flex flex-col gap-1">
+              <div className="px-2 py-1 text-[10px] font-mono uppercase text-slate-400 border-b border-[#132238]">
+                Deterministic Disruption Tests
+              </div>
+              <button
+                type="button"
+                disabled={isTriggering}
+                onClick={() => {
+                  setShowSimMenu(false);
+                  onTriggerScenario('CNC-02 spindle gearbox failure with severe thermal vibration', 'SCENARIO_A');
+                }}
+                className={`w-full text-left px-2.5 py-2 rounded text-xs transition flex items-center justify-between ${
+                  activeScenarioId === 'SCENARIO_A' ? 'bg-[#00F2FE]/10 text-[#00F2FE]' : 'hover:bg-[#132238] text-slate-200'
+                }`}
+              >
+                <div>
+                  <div className="font-medium">SIM-A: CNC-02 Failure</div>
+                  <div className="text-[10px] text-slate-400">Spindle gearbox thermal vibration</div>
                 </div>
+                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">CRITICAL</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isTriggering}
+                onClick={() => {
+                  setShowSimMenu(false);
+                  onTriggerScenario('Shipment delay on incoming Ti-6Al-4V titanium alloy billets', 'SCENARIO_B');
+                }}
+                className={`w-full text-left px-2.5 py-2 rounded text-xs transition flex items-center justify-between ${
+                  activeScenarioId === 'SCENARIO_B' ? 'bg-[#FFB95F]/10 text-[#FFB95F]' : 'hover:bg-[#132238] text-slate-200'
+                }`}
+              >
+                <div>
+                  <div className="font-medium">SIM-B: Material Delay</div>
+                  <div className="text-[10px] text-slate-400">Ti-6Al-4V shipment delayed 48h</div>
+                </div>
+                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">WARNING</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isTriggering}
+                onClick={() => {
+                  setShowSimMenu(false);
+                  onTriggerScenario('Critical inventory shortage: raw material depleted below safety buffer', 'SCENARIO_C');
+                }}
+                className={`w-full text-left px-2.5 py-2 rounded text-xs transition flex items-center justify-between ${
+                  activeScenarioId === 'SCENARIO_C' ? 'bg-[#FF5C5C]/10 text-[#FF5C5C]' : 'hover:bg-[#132238] text-slate-200'
+                }`}
+              >
+                <div>
+                  <div className="font-medium">SIM-C: Stock Depletion</div>
+                  <div className="text-[10px] text-slate-400">Alloy stock below safety buffer</div>
+                </div>
+                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">STOCKOUT</span>
+              </button>
+
+              <div className="border-t border-[#132238] mt-1 pt-1">
                 <button
                   type="button"
+                  disabled={isResetting}
                   onClick={() => {
-                    setShowProfileMenu(false);
-                    onLogout();
+                    setShowSimMenu(false);
+                    onResetFactory();
                   }}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded text-xs text-error hover:bg-error-container hover:text-on-error-container transition font-mono font-bold"
+                  className="w-full text-left px-2.5 py-1.5 rounded text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-[16px]">logout</span>
-                  <span>Sign Out Terminal</span>
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Reset Factory Baseline</span>
                 </button>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Co-Pilot Chat Button */}
+        {onToggleChat && (
+          <button
+            type="button"
+            onClick={onToggleChat}
+            className="p-2 rounded-full bg-[#0B1320] border border-[#182840] hover:border-[#1E3557] text-slate-300 hover:text-[#00F2FE] transition"
+            title="Open Factory Intelligence Assistant"
+          >
+            <MessageSquare className="h-4 w-4" />
+          </button>
+        )}
+
+        {/* Notifications Bell matching reference */}
+        <div className="relative">
+          <button
+            type="button"
+            className="relative p-2 rounded-full bg-[#0B1320] border border-[#182840] hover:border-[#1E3557] text-slate-300 hover:text-white transition"
+            title="Notifications"
+          >
+            <Bell className="h-4 w-4" />
+            {unreadAlertCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] px-1 rounded-full bg-[#FF5C5C] text-white text-[10px] font-bold flex items-center justify-center">
+                {unreadAlertCount}
+              </span>
             )}
-          </div>
+          </button>
+        </div>
+
+        {/* Factory Status Pill matching reference: "● Factory Online" */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0B1320] border border-[#182840]">
+          <span className="h-2 w-2 rounded-full bg-[#4EDEA3] animate-pulse" />
+          <span className="text-xs font-medium text-slate-200">Factory Online</span>
+        </div>
+
+        {/* User Profile Pill matching reference: "ST Snehansh Tripathy v" */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowProfileMenu((prev) => !prev)}
+            className="flex items-center gap-2.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#0B1320] border border-[#182840] hover:border-[#1E3557] transition"
+          >
+            <div className="h-6 w-6 rounded-full bg-[#0284C7] text-white font-mono text-[11px] font-bold flex items-center justify-center">
+              {currentUser?.avatarInitials || 'ST'}
+            </div>
+            <span className="text-xs font-medium text-slate-200 hidden sm:inline">
+              {currentUser?.name || 'Snehansh Tripathy'}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+          </button>
+
+          {showProfileMenu && (
+            <div className="absolute right-0 top-11 w-64 bg-[#0B1320] border border-[#182840] rounded-lg shadow-2xl p-3 z-50 animate-fade-in font-sans">
+              <div className="border-b border-[#132238] pb-2">
+                <div className="text-xs font-semibold text-slate-200 truncate">
+                  {currentUser?.name || 'Snehansh Tripathy'}
+                </div>
+                <div className="text-[11px] text-[#00F2FE] truncate mt-0.5">
+                  {currentUser?.role || 'Plant Operations Director'}
+                </div>
+                <div className="text-[10px] text-slate-400 truncate mt-0.5">
+                  CNC Precision Works • Plant CNC-001
+                </div>
+              </div>
+
+              <div className="py-2 flex flex-col gap-1 border-b border-[#132238]">
+                <button
+                  type="button"
+                  disabled={isResetting}
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    onResetFactory();
+                  }}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded text-xs text-slate-300 hover:bg-[#132238] hover:text-white transition"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Reset Factory State</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  onLogout();
+                }}
+                className="mt-2 w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs text-[#FF5C5C] hover:bg-red-500/10 transition font-medium"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
   );
 };
+

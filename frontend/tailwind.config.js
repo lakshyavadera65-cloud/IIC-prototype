@@ -8,148 +8,167 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Dark Industrial Palette matching reference image
+        industrial: {
+          bg: "#070D17",
+          card: "#0B1320",
+          cardHover: "#0E1726",
+          border: "#132238",
+          borderSubtle: "#182840",
+          borderLight: "#203554",
+          cyan: "#00F2FE",
+          teal: "#4CD7F6",
+          emerald: "#4EDEA3",
+          amber: "#FFB95F",
+          red: "#FF5C5C",
+          blue: "#3B82F6",
+          purple: "#8B5CF6",
+          text: "#E2E8F0",
+          textMuted: "#94A3B8",
+          textDim: "#64748B",
+        },
         // Nested Surface structure
         surface: {
-          DEFAULT: "#10141a",
-          dim: "#10141a",
-          bright: "#353940",
-          variant: "#31353c",
-          tint: "#4cd7f6",
+          DEFAULT: "#0B1320",
+          dim: "#070D17",
+          bright: "#16253D",
+          variant: "#132238",
+          tint: "#00F2FE",
           container: {
-            DEFAULT: "#1c2026",
-            lowest: "#0a0e14",
-            low: "#181c22",
-            high: "#262a31",
-            highest: "#31353c",
+            DEFAULT: "#0E1726",
+            lowest: "#070D17",
+            low: "#0B1320",
+            high: "#132238",
+            highest: "#182840",
           },
         },
-        // Flat Surface token aliases (guarantees both kebab-case and nested paths)
-        "surface-container-lowest": "#0a0e14",
-        "surface-container-low": "#181c22",
-        "surface-container": "#1c2026",
-        "surface-container-high": "#262a31",
-        "surface-container-highest": "#31353c",
-        "surface-variant": "#31353c",
-        "surface-dim": "#10141a",
-        "surface-bright": "#353940",
-        "surface-tint": "#4cd7f6",
-        background: "#10141a",
-        "on-background": "#dfe2eb",
+        // Flat Surface token aliases
+        "surface-container-lowest": "#070D17",
+        "surface-container-low": "#0B1320",
+        "surface-container": "#0E1726",
+        "surface-container-high": "#132238",
+        "surface-container-highest": "#182840",
+        "surface-variant": "#132238",
+        "surface-dim": "#070D17",
+        "surface-bright": "#16253D",
+        "surface-tint": "#00F2FE",
+        background: "#070D17",
+        "on-background": "#E2E8F0",
 
         // Nested On-Surface structure & flat aliases
         "on-surface": {
-          DEFAULT: "#dfe2eb",
-          variant: "#bcc9cd",
+          DEFAULT: "#E2E8F0",
+          variant: "#94A3B8",
         },
-        "on-surface-variant": "#bcc9cd",
-        "inverse-surface": "#dfe2eb",
-        "inverse-on-surface": "#2d3137",
+        "on-surface-variant": "#94A3B8",
+        "inverse-surface": "#E2E8F0",
+        "inverse-on-surface": "#1E293B",
 
         // Outline tokens
         outline: {
-          DEFAULT: "#869397",
-          variant: "#3d494c",
+          DEFAULT: "#64748B",
+          variant: "#132238",
         },
-        "outline-variant": "#3d494c",
+        "outline-variant": "#132238",
 
-        // Primary / Compute Cyan
+        // Primary / Industrial Cyan
         primary: {
-          DEFAULT: "#4cd7f6",
-          container: "#06b6d4",
+          DEFAULT: "#00F2FE",
+          container: "#0284C7",
           fixed: {
-            DEFAULT: "#acedff",
-            dim: "#4cd7f6",
+            DEFAULT: "#38BDF8",
+            dim: "#00F2FE",
           },
         },
-        "primary-container": "#06b6d4",
-        "primary-fixed": "#acedff",
-        "primary-fixed-dim": "#4cd7f6",
-        "inverse-primary": "#00687a",
+        "primary-container": "#0369A1",
+        "primary-fixed": "#38BDF8",
+        "primary-fixed-dim": "#00F2FE",
+        "inverse-primary": "#0284C7",
 
         "on-primary": {
-          DEFAULT: "#003640",
-          container: "#00424f",
+          DEFAULT: "#031726",
+          container: "#E0F2FE",
           fixed: {
-            DEFAULT: "#001f26",
-            variant: "#004e5c",
+            DEFAULT: "#031726",
+            variant: "#075985",
           },
         },
-        "on-primary-container": "#00424f",
-        "on-primary-fixed": "#001f26",
-        "on-primary-fixed-variant": "#004e5c",
+        "on-primary-container": "#E0F2FE",
+        "on-primary-fixed": "#031726",
+        "on-primary-fixed-variant": "#075985",
 
-        // Secondary / Recovery Emerald
+        // Secondary / Operational Emerald
         secondary: {
-          DEFAULT: "#4edea3",
-          container: "#00a572",
+          DEFAULT: "#4EDEA3",
+          container: "#059669",
           fixed: {
-            DEFAULT: "#6ffbbe",
-            dim: "#4edea3",
+            DEFAULT: "#6EE7B7",
+            dim: "#4EDEA3",
           },
         },
-        "secondary-container": "#00a572",
-        "secondary-fixed": "#6ffbbe",
-        "secondary-fixed-dim": "#4edea3",
+        "secondary-container": "#065F46",
+        "secondary-fixed": "#6EE7B7",
+        "secondary-fixed-dim": "#4EDEA3",
 
         "on-secondary": {
-          DEFAULT: "#003824",
-          container: "#00311f",
+          DEFAULT: "#022C1C",
+          container: "#D1FAE5",
           fixed: {
-            DEFAULT: "#002113",
-            variant: "#005236",
+            DEFAULT: "#022C1C",
+            variant: "#047857",
           },
         },
-        "on-secondary-container": "#00311f",
-        "on-secondary-fixed": "#002113",
-        "on-secondary-fixed-variant": "#005236",
+        "on-secondary-container": "#D1FAE5",
+        "on-secondary-fixed": "#022C1C",
+        "on-secondary-fixed-variant": "#047857",
 
-        // Tertiary / Telemetry Amber
+        // Tertiary / Warning Amber
         tertiary: {
-          DEFAULT: "#ffb95f",
-          container: "#e79400",
+          DEFAULT: "#FFB95F",
+          container: "#D97706",
           fixed: {
-            DEFAULT: "#ffddb8",
-            dim: "#ffb95f",
+            DEFAULT: "#FDE68A",
+            dim: "#FFB95F",
           },
         },
-        "tertiary-container": "#e79400",
-        "tertiary-fixed": "#ffddb8",
-        "tertiary-fixed-dim": "#ffb95f",
+        "tertiary-container": "#92400E",
+        "tertiary-fixed": "#FDE68A",
+        "tertiary-fixed-dim": "#FFB95F",
 
         "on-tertiary": {
-          DEFAULT: "#472a00",
-          container: "#563400",
+          DEFAULT: "#3B1A00",
+          container: "#FEF3C7",
           fixed: {
-            DEFAULT: "#2a1700",
-            variant: "#653e00",
+            DEFAULT: "#3B1A00",
+            variant: "#B45309",
           },
         },
-        "on-tertiary-container": "#563400",
-        "on-tertiary-fixed": "#2a1700",
-        "on-tertiary-fixed-variant": "#653e00",
+        "on-tertiary-container": "#FEF3C7",
+        "on-tertiary-fixed": "#3B1A00",
+        "on-tertiary-fixed-variant": "#B45309",
 
         // Error / Critical Crimson
         error: {
-          DEFAULT: "#ffb4ab",
-          container: "#93000a",
+          DEFAULT: "#FF5C5C",
+          container: "#DC2626",
         },
-        "error-container": "#93000a",
+        "error-container": "#991B1B",
 
         "on-error": {
-          DEFAULT: "#690005",
-          container: "#ffdad6",
+          DEFAULT: "#450A0A",
+          container: "#FEE2E2",
         },
-        "on-error-container": "#ffdad6",
+        "on-error-container": "#FEE2E2",
 
-        // Legacy pulse tokens for backward compatibility
+        // Pulse tokens for backward compatibility
         pulse: {
-          bg: "#0A0E14",
-          card: "#181C22",
-          border: "#252D38",
-          cyan: "#4CD7F6",
+          bg: "#070D17",
+          card: "#0B1320",
+          border: "#132238",
+          cyan: "#00F2FE",
           emerald: "#4EDEA3",
           amber: "#FFB95F",
-          rose: "#FFB4AB",
+          rose: "#FF5C5C",
           purple: "#8B5CF6",
         }
       },

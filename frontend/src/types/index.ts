@@ -19,6 +19,9 @@ export interface MachineState {
   is_custom?: boolean;
 }
 
+export type Machine = MachineState;
+
+
 export interface MachineFormData {
   name: string;
   id?: string;
@@ -63,6 +66,8 @@ export interface OrderState {
   revenue_value: number;
 }
 
+export type Order = OrderState;
+
 export interface ScheduleSlot {
   id: string;
   order_id: string;
@@ -72,6 +77,7 @@ export interface ScheduleSlot {
   duration_hours: number;
   status: 'scheduled' | 'clash' | 'delayed' | 'rerouted' | 'completed';
 }
+
 
 export type RootCauseCategory =
   | 'equipment_failure'
@@ -147,6 +153,9 @@ export const ROOT_CAUSE_BENCHMARKS: Record<RootCauseCategory, RootCauseBenchmark
 export const INDUSTRY_GLOBAL_BENCHMARK =
   '500 largest global manufacturers lose ~$1.4T/year to unplanned downtime (~11% of revenue); average factory loses ~800 hours/year to preventable breakdowns.';
 
+export type ScheduleItem = ScheduleSlot;
+
+
 export interface DisruptionEvent {
   id: string;
   type: string;
@@ -159,6 +168,10 @@ export interface DisruptionEvent {
   root_cause_category?: RootCauseCategory;
   root_cause_benchmark?: RootCauseBenchmark;
 }
+
+
+export type Disruption = DisruptionEvent;
+
 
 
 export interface RippleNode {

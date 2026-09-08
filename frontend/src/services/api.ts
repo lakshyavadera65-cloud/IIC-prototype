@@ -57,7 +57,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 /**
- * Fetch the complete live factory state and current Factory Pulse score from the FastAPI backend.
+ * Fetch the complete live factory state and current operational status from the FastAPI backend.
  */
 export async function fetchFactoryState(): Promise<FactoryState> {
   const [stateRes, pulseRes] = await Promise.all([

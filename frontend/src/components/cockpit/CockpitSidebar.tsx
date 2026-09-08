@@ -1,6 +1,30 @@
 import React from 'react';
+import {
+  LayoutDashboard,
+  Cpu,
+  ClipboardList,
+  Calendar,
+  AlertTriangle,
+  Sparkles,
+  ShieldCheck,
+  FileSpreadsheet,
+  Settings,
+  ChevronRight,
+  Building2,
+  UploadCloud
+} from 'lucide-react';
 
 export type CockpitTab =
+  | 'dashboard'
+  | 'machines'
+  | 'orders'
+  | 'schedule'
+  | 'alerts'
+  | 'agents'
+  | 'recovery'
+  | 'import'
+  | 'settings'
+  // Backward compatibility aliases
   | 'tactical-overview'
   | 'telemetry-stream'
   | 'agent-orchestration'
@@ -20,65 +44,69 @@ export const CockpitSidebar: React.FC<CockpitSidebarProps> = ({
   activeDisruptionCount = 0,
   onOpenImport,
 }) => {
-  const navItems: Array<{ id: CockpitTab; label: string; icon: string; badge?: string | number }> = [
-    { id: 'tactical-overview', label: 'Tactical Overview', icon: 'grid_view' },
-    { id: 'telemetry-stream', label: 'Telemetry Feeds', icon: 'terminal' },
-    { id: 'agent-orchestration', label: 'Autonomous Agents', icon: 'hub', badge: '4' },
+  // Normalize legacy tab IDs if passed
+  const currentTab =
+    activeTab === 'tactical-overview'
+      ? 'dashboard'
+      : activeTab === 'telemetry-stream' || activeTab === 'hardware-health'
+      ? 'machines'
+      : activeTab === 'agent-orchestration'
+      ? 'agents'
+      : activeTab === 'incident-clash-matrix'
+      ? 'alerts'
+      : activeTab;
+
+  const navItems: Array<{
+    id: CockpitTab;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: string | number;
+    badgeColor?: string;
+  }> = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'machines', label: 'Machines', icon: Cpu },
+    { id: 'orders', label: 'Orders', icon: ClipboardList },
+    { id: 'schedule', label: 'Schedule', icon: Calendar },
     {
-      id: 'incident-clash-matrix',
-      label: 'Clash Matrix',
-      icon: 'warning',
-      badge: activeDisruptionCount > 0 ? activeDisruptionCount : undefined,
+      id: 'alerts',
+      label: 'Alerts',
+      icon: AlertTriangle,
+      badge: activeDisruptionCount > 0 ? activeDisruptionCount : 3,
+      badgeColor: 'bg-[#FF5C5C] text-white',
     },
-    { id: 'hardware-health', label: 'Hardware Topology', icon: 'precision_manufacturing' },
+    { id: 'agents', label: 'Intelligence Agents', icon: Sparkles },
+    { id: 'recovery', label: 'Recovery Plans', icon: ShieldCheck },
+    { id: 'import', label: 'Data Import', icon: UploadCloud },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-space-md border-r border-outline-variant/30 select-none">
-      {/* Top Node Indicator & Navigation */}
-      <div className="flex flex-col gap-space-md">
-        {/* Cockpit Node Status */}
-        <div className="px-space-lg flex items-center justify-between">
-          <div className="flex items-center gap-space-sm">
-            <div className="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(78,222,163,0.6)] animate-pulse" />
-            <span className="font-mono text-label-caps text-on-surface-variant uppercase tracking-widest font-semibold">
-              COCKPIT NODE 04
-            </span>
-          </div>
-          <span className="font-mono text-[9px] text-secondary bg-secondary/15 px-1.5 py-0.5 rounded font-bold">
-            SYNC
-          </span>
-        </div>
-
-        {/* Navigation Items */}
-        <nav className="flex flex-col px-space-sm gap-space-2xs">
+    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-[#070D17] border-r border-[#132238] z-30 flex flex-col justify-between p-3 select-none">
+      {/* 1. Main Navigation Links */}
+      <div className="flex flex-col gap-1 pt-1">
+        <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
-            const isActive = activeTab === item.id;
+            const isActive = currentTab === item.id;
+            const Icon = item.icon;
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => onTabChange(item.id)}
-                className={`w-full flex items-center justify-between px-space-md py-space-sm rounded transition-all duration-150 text-left ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                   isActive
-                    ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm'
-                    : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                    ? 'bg-[#00F2FE]/10 text-[#00F2FE] border border-[#00F2FE]/25 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#0E1726]'
                 }`}
               >
-                <div className="flex items-center gap-space-sm truncate">
-                  <span className="material-symbols-outlined text-[18px] shrink-0">
-                    {item.icon}
-                  </span>
-                  <span className="text-body-md truncate">{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#00F2FE]' : 'text-slate-400'}`} />
+                  <span className="text-[13px]">{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
                   <span
-                    className={`ml-2 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
-                      isActive
-                        ? 'bg-on-primary-container text-primary-container'
-                        : item.id === 'incident-clash-matrix' && activeDisruptionCount > 0
-                        ? 'bg-error text-on-error animate-pulse'
-                        : 'bg-surface-container-high text-on-surface-variant'
+                    className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+                      item.badgeColor || 'bg-[#132238] text-slate-300'
                     }`}
                   >
                     {item.badge}
@@ -88,42 +116,31 @@ export const CockpitSidebar: React.FC<CockpitSidebarProps> = ({
             );
           })}
         </nav>
-
-        {onOpenImport && (
-          <div className="px-space-md pt-1">
-            <button
-              type="button"
-              onClick={onOpenImport}
-              id="sidebar-import-btn"
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded bg-surface-container hover:bg-surface-container-high border border-primary/40 text-primary hover:text-on-surface font-mono text-xs font-bold transition shadow-sm cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
-              <span>Import Factory Data</span>
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Bottom Telemetry Card */}
-      <div className="px-space-md flex flex-col gap-space-xs font-mono">
-        <div className="bg-surface-container p-space-sm rounded flex flex-col gap-space-2xs border border-outline-variant/30">
-          <div className="flex items-center justify-between">
-            <span className="text-label-caps text-on-surface-variant">LATENCY</span>
-            <span className="text-mono-code text-secondary font-bold">4.2ms</span>
+      {/* 2. Bottom Card: Factory Profile matching reference image */}
+      <div className="pt-3 border-t border-[#132238]/80">
+        <div className="p-3 rounded-xl bg-[#0B1320] border border-[#132238] hover:border-[#1E3557] transition flex flex-col gap-2 cursor-pointer group">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-[#132238] border border-[#1A2E4C] flex items-center justify-center text-[#00F2FE] shrink-0">
+              <Building2 className="h-4 w-4" />
+            </div>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-xs font-semibold text-slate-200 truncate">CNC Precision Works</span>
+              <span className="text-[10px] text-slate-400 font-mono">Factory ID: CNC-001</span>
+            </div>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-label-caps text-on-surface-variant">BUFFER FILL</span>
-            <span className="text-mono-code text-primary font-bold">31%</span>
+
+          <div className="flex items-center justify-between pt-1 border-t border-[#132238]/60">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#4EDEA3]/10 text-[#4EDEA3] text-[10px] font-medium">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#4EDEA3] animate-pulse" />
+              <span>Operational</span>
+            </div>
+            <ChevronRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-slate-300 transition-transform group-hover:translate-x-0.5" />
           </div>
-        </div>
-        <div className="flex items-center justify-between px-space-xs text-[10px]">
-          <span className="text-on-surface-variant">VER 4.19-SEC</span>
-          <span className="text-secondary font-bold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-            ONLINE
-          </span>
         </div>
       </div>
     </aside>
   );
 };
+

@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { CockpitSidebar, CockpitTab } from './components/cockpit/CockpitSidebar';
 import { CockpitHeader } from './components/cockpit/CockpitHeader';
-import { IncidentBanner } from './components/cockpit/IncidentBanner';
-import { AgentCascadeRail } from './components/cockpit/AgentCascadeRail';
-import { ShopFloorGantt } from './components/cockpit/ShopFloorGantt';
-import { BlastRadiusTopology } from './components/cockpit/BlastRadiusTopology';
-import { RecoveryPlanMatrix } from './components/cockpit/RecoveryPlanMatrix';
-import { FloatingCoPilotDrawer } from './components/cockpit/FloatingCoPilotDrawer';
+import { DashboardOverview } from './components/cockpit/DashboardOverview';
+import { MachinesPage } from './components/cockpit/MachinesPage';
+import { OrdersPage } from './components/cockpit/OrdersPage';
+import { SchedulePage } from './components/cockpit/SchedulePage';
+import { AlertsPage } from './components/cockpit/AlertsPage';
+import { AgentsPage } from './components/cockpit/AgentsPage';
+import { RecoveryPlansPage } from './components/cockpit/RecoveryPlansPage';
+import { DataImportPage } from './components/cockpit/DataImportPage';
+import { SettingsPage } from './components/cockpit/SettingsPage';
 
-import { MachineStatusGrid } from './components/MachineStatusGrid';
-import { OrdersTable } from './components/OrdersTable';
-import { MaterialInventoryBar } from './components/MaterialInventoryBar';
+import { AddMachineModal } from './components/cockpit/AddMachineModal';
+import { ImportFactoryDataModal } from './components/cockpit/ImportFactoryDataModal';
+import { FloatingCoPilotDrawer } from './components/cockpit/FloatingCoPilotDrawer';
 import { RippleGraphModal } from './components/RippleGraphModal';
-import { PipelineTracker } from './components/PipelineTracker';
-import { AlertDetailView } from './components/AlertDetailView';
 
 import { Router, useRouter } from './components/router/Router';
 import { LoginPage } from './components/auth/LoginPage';
@@ -21,9 +22,15 @@ import { RegisterPage } from './components/auth/RegisterPage';
 import { authService, UserProfile } from './services/authService';
 
 import { FactoryState, PipelineResult, MachineFormData } from './types';
-import { fetchFactoryState, resetFactory, triggerDisruption, executePlan, createMachine, updateMachine, deleteMachine } from './services/api';
-import { AddMachineModal } from './components/cockpit/AddMachineModal';
-import { ImportFactoryDataModal } from './components/cockpit/ImportFactoryDataModal';
+import {
+  fetchFactoryState,
+  resetFactory,
+  triggerDisruption,
+  executePlan,
+  createMachine,
+  updateMachine,
+  deleteMachine,
+} from './services/api';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 function AppContent() {
@@ -33,7 +40,7 @@ function AppContent() {
     return authService.getCurrentUser();
   });
 
-  const [activeTab, setActiveTab] = useState<CockpitTab>('tactical-overview');
+  const [activeTab, setActiveTab] = useState<CockpitTab>('dashboard');
   const [factoryState, setFactoryState] = useState<FactoryState | null>(null);
   const [pipelineResult, setPipelineResult] = useState<PipelineResult | null>(null);
   const [isLoadingPipeline, setIsLoadingPipeline] = useState<boolean>(false);
@@ -43,10 +50,11 @@ function AppContent() {
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
 
   // Staged progression counter (0: none, 1: sentinel, 2: impact, 3: strategist, 4: oracle)
-  const [revealedStageIndex, setRevealedStageIndex] = useState<number>(0);
+  const [revealedStageIndex, setRevealedStageIndex] = useState<number>(4);
 
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [isGraphOpen, setIsGraphOpen] = useState<boolean>(false);
-  const [isChatOpen, setIsChatOpen] = useState<boolean>(true);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [isAddMachineOpen, setIsAddMachineOpen] = useState<boolean>(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -104,6 +112,8 @@ function AppContent() {
             setIsLoadingPipeline(false);
             // Refresh digital twin state to reflect schedule clashes and machine failure
             await loadState();
+            setToastMessage(`Disruption ${scenarioId || 'detected'}: Autonomous Sentinel, Impact, Strategist, Oracle executed.`);
+            setTimeout(() => setToastMessage(null), 5000);
           }, 450);
         }, 400);
       }, 400);
@@ -120,6 +130,8 @@ function AppContent() {
       const res = await executePlan(planId);
       setExecutedPlanId(planId);
       setFactoryState(res.factory_state);
+      setToastMessage(`Recovery Plan ${planId} successfully executed and committed to digital twin.`);
+      setTimeout(() => setToastMessage(null), 5000);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to execute recovery plan.');
     } finally {
@@ -136,8 +148,10 @@ function AppContent() {
       const pristineState = await resetFactory();
       setFactoryState(pristineState);
       setPipelineResult(null);
-      setRevealedStageIndex(0);
+      setRevealedStageIndex(4);
       setExecutedPlanId(null);
+      setToastMessage('Factory nominal baseline successfully restored.');
+      setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to reset factory.');
     } finally {
@@ -156,7 +170,7 @@ function AppContent() {
   const handleMachineStatusChange = async (machineId: string, status: string) => {
     await updateMachine(machineId, { status: status as any });
     await loadState();
-    setToastMessage(`Workstation ${machineId} status changed to ${status.toUpperCase()}.`);
+    setToastMessage(`Workstation ${machineId} status updated to ${status.toUpperCase()}.`);
     setTimeout(() => setToastMessage(null), 3000);
   };
 
@@ -196,216 +210,144 @@ function AppContent() {
 
   const activeDisruption = factoryState?.active_disruptions?.[0];
   const atRiskOrdersCount = factoryState?.orders?.filter((o) => o.status === 'at_risk' || o.status === 'delayed').length || 0;
-  const healthScore = factoryState?.health_score ?? 94.0;
+
+  // Normalize tab
+  const normalizedTab =
+    activeTab === 'tactical-overview'
+      ? 'dashboard'
+      : activeTab === 'telemetry-stream' || activeTab === 'hardware-health'
+      ? 'machines'
+      : activeTab === 'agent-orchestration'
+      ? 'agents'
+      : activeTab === 'incident-clash-matrix'
+      ? 'alerts'
+      : activeTab;
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container font-sans flex">
-      {/* 1. Fixed Left Sidebar */}
+    <div className="min-h-screen bg-[#070D17] text-slate-200 antialiased font-sans flex">
+      {/* 1. Fixed Top Header */}
+      <CockpitHeader
+        currentUser={currentUser}
+        onTriggerScenario={handleTrigger}
+        onResetFactory={handleReset}
+        onLogout={handleLogout}
+        onToggleChat={() => setIsChatOpen((prev) => !prev)}
+        isTriggering={isLoadingPipeline}
+        isResetting={isResetting}
+        activeScenarioId={activeScenarioId}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => {
+          setSearchQuery(q);
+          if (q && normalizedTab === 'dashboard') {
+            setActiveTab('machines');
+          }
+        }}
+        unreadAlertCount={activeDisruption ? 1 : 0}
+      />
+
+      {/* 2. Fixed Left Sidebar */}
       <CockpitSidebar
-        activeTab={activeTab}
+        activeTab={normalizedTab}
         onTabChange={(t) => setActiveTab(t)}
         activeDisruptionCount={activeDisruption ? 1 : 0}
         onOpenImport={() => setIsImportModalOpen(true)}
       />
 
-      {/* 2. Main Content Wrapper (pl-64 for sidebar offset) */}
+      {/* 3. Main Workspace Body (offset pl-64 for sidebar, pt-16 for header) */}
       <div className="pl-64 w-full flex flex-col min-h-screen">
-        {/* Fixed Top Header (left-64) */}
-        <CockpitHeader
-          healthScore={healthScore}
-          currentUser={currentUser}
-          onTriggerScenario={handleTrigger}
-          onResetFactory={handleReset}
-          onLogout={handleLogout}
-          onToggleChat={() => setIsChatOpen((prev) => !prev)}
-          isTriggering={isLoadingPipeline}
-          isResetting={isResetting}
-          activeScenarioId={activeScenarioId}
-        />
+        <main className="relative pt-20 px-6 bg-[#070D17] min-h-screen w-full flex-1">
+          {/* Error notification banner if any */}
+          {errorMessage && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/15 border border-red-500/40 text-red-400 text-xs flex items-center gap-2 shadow-lg font-mono">
+              <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
-        {/* Workspace Body (pt-16 for header offset) */}
-        <main className="relative pt-16 bg-surface-container-lowest min-h-screen w-full flex-1">
-          <div className="flex flex-col w-full text-on-surface p-space-md gap-space-md">
-            {/* Error Alert if any */}
-            {errorMessage && (
-              <div className="p-3 rounded bg-error-container/80 border border-error text-on-error-container text-xs flex items-center gap-2 shadow-lg animate-shake font-mono">
-                <AlertCircle className="h-4 w-4 shrink-0 text-error" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
+          {/* TAB 1: Dashboard (Overview) matching the reference image */}
+          {normalizedTab === 'dashboard' && (
+            <DashboardOverview
+              factoryState={factoryState}
+              userName={currentUser?.name?.split(' ')[0] || 'Snehansh'}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+              onOpenAddMachine={() => setIsAddMachineOpen(true)}
+              onOpenImport={() => setIsImportModalOpen(true)}
+              onOpenRecovery={() => setActiveTab('recovery')}
+              onToggleChat={() => setIsChatOpen(true)}
+              activeDisruptionCount={activeDisruption ? 1 : 0}
+            />
+          )}
 
-            {/* TAB: Tactical Overview (Primary 16-Column Mission Control) */}
-            {activeTab === 'tactical-overview' && (
-              <>
-                {/* Top Zone: Live Incident Ticker & Telemetry Micro-Pills */}
-                <IncidentBanner
-                  activeDisruption={activeDisruption}
-                  ordersAtRiskCount={atRiskOrdersCount}
-                  isMitigating={isLoadingPipeline}
-                />
+          {/* TAB 2: Machines / Workstations */}
+          {normalizedTab === 'machines' && (
+            <MachinesPage
+              machines={factoryState?.machines || []}
+              onOpenAddModal={() => setIsAddMachineOpen(true)}
+              onStatusChange={handleMachineStatusChange}
+              onDeleteMachine={handleDeleteMachine}
+            />
+          )}
 
-                {/* 16-Column Tactical Cockpit Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-16 gap-space-md items-start">
-                  {/* Left Rail (4 cols): Multi-Agent Cascade */}
-                  <AgentCascadeRail
-                    pipelineResult={pipelineResult}
-                    revealedStageIndex={revealedStageIndex}
-                    isRunning={isLoadingPipeline}
-                  />
+          {/* TAB 3: Production Orders */}
+          {normalizedTab === 'orders' && (
+            <OrdersPage orders={factoryState?.orders || []} />
+          )}
 
-                  {/* Center & Right Workspace (12 cols) */}
-                  <div className="xl:col-span-12 flex flex-col gap-space-md">
-                    {/* Stage 1: Shop Floor Gantt Schedule */}
-                    <ShopFloorGantt
-                      schedule={factoryState?.schedule || []}
-                      machines={factoryState?.machines || []}
-                      orders={factoryState?.orders || []}
-                      activeDisruption={activeDisruption}
-                      executedPlanId={executedPlanId}
-                    />
+          {/* TAB 4: Production Schedule */}
+          {normalizedTab === 'schedule' && (
+            <SchedulePage
+              schedule={factoryState?.schedule || []}
+              machines={factoryState?.machines || []}
+              orders={factoryState?.orders || []}
+              activeDisruptionCount={activeDisruption ? 1 : 0}
+            />
+          )}
 
-                    {/* Stage 2: Blast Radius & Reroute Topology */}
-                    <BlastRadiusTopology
-                      impact={pipelineResult?.impact || null}
-                      onOpenGraphModal={() => setIsGraphOpen(true)}
-                      isRecovered={Boolean(executedPlanId)}
-                    />
+          {/* TAB 5: Alerts / Incidents */}
+          {normalizedTab === 'alerts' && (
+            <AlertsPage
+              activeDisruption={activeDisruption}
+              pipelineResult={pipelineResult}
+              onTriggerScenario={handleTrigger}
+              onNavigateToRecovery={() => setActiveTab('recovery')}
+              isTriggering={isLoadingPipeline}
+            />
+          )}
 
-                    {/* Stage 3: Candidate Recovery Plans Matrix */}
-                    <RecoveryPlanMatrix
-                      plans={pipelineResult?.plans || []}
-                      onExecutePlan={handleExecutePlan}
-                      isExecuting={isExecutingPlan}
-                      executedPlanId={executedPlanId}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+          {/* TAB 6: Intelligence Agents */}
+          {normalizedTab === 'agents' && (
+            <AgentsPage
+              pipelineResult={pipelineResult}
+              isRunning={isLoadingPipeline}
+              revealedStageIndex={revealedStageIndex}
+            />
+          )}
 
-            {/* TAB: Telemetry Feeds */}
-            {activeTab === 'telemetry-stream' && factoryState && (
-              <div className="flex flex-col gap-space-md">
-                <div className="flex items-center justify-between border-b border-outline-variant/30 pb-space-xs">
-                  <h2 className="font-mono text-headline-sm uppercase font-bold text-primary">
-                    Shop Floor Hardware &amp; Material Telemetry
-                  </h2>
-                  <span className="font-mono text-xs text-on-surface-variant">
-                    6 Machines Online • Continuous Ingest 12.4k msg/s
-                  </span>
-                </div>
-                <MachineStatusGrid
-                  machines={factoryState.machines}
-                  activeDisruptedEntity={activeDisruption?.entity}
-                  onOpenAddModal={() => setIsAddMachineOpen(true)}
-                  onOpenImportModal={() => setIsImportModalOpen(true)}
-                  onStatusChange={handleMachineStatusChange}
-                  onDeleteMachine={handleDeleteMachine}
-                />
-                <MaterialInventoryBar
-                  materials={factoryState.materials}
-                  disruptedMaterialId={activeDisruption?.entity}
-                />
-              </div>
-            )}
+          {/* TAB 7: Recovery Plans */}
+          {normalizedTab === 'recovery' && (
+            <RecoveryPlansPage
+              plans={pipelineResult?.plans || []}
+              onExecutePlan={handleExecutePlan}
+              isExecuting={isExecutingPlan}
+              executedPlanId={executedPlanId}
+            />
+          )}
 
-            {/* TAB: Autonomous Agents */}
-            {activeTab === 'agent-orchestration' && (
-              <div className="flex flex-col gap-space-md">
-                <div className="flex items-center justify-between border-b border-outline-variant/30 pb-space-xs">
-                  <h2 className="font-mono text-headline-sm uppercase font-bold text-secondary">
-                    Autonomous Multi-Agent Consensus Engine
-                  </h2>
-                  <span className="font-mono text-xs text-on-surface-variant">
-                    Deterministic Graph Solver + Monte Carlo Simulation
-                  </span>
-                </div>
-                <PipelineTracker
-                  pipelineResult={pipelineResult}
-                  isRunning={isLoadingPipeline}
-                  revealedStageIndex={revealedStageIndex}
-                />
-                {pipelineResult?.impact && (
-                  <AlertDetailView
-                    event={pipelineResult.event}
-                    impact={pipelineResult.impact}
-                    onOpenGraph={() => setIsGraphOpen(true)}
-                  />
-                )}
-              </div>
-            )}
+          {/* TAB 8: Data Import */}
+          {normalizedTab === 'import' && (
+            <DataImportPage onOpenImportModal={() => setIsImportModalOpen(true)} />
+          )}
 
-            {/* TAB: Clash Matrix */}
-            {activeTab === 'incident-clash-matrix' && factoryState && (
-              <div className="flex flex-col gap-space-md">
-                <div className="flex items-center justify-between border-b border-outline-variant/30 pb-space-xs">
-                  <h2 className="font-mono text-headline-sm uppercase font-bold text-error">
-                    Active Clash Matrix &amp; Customer Order Risk Registry
-                  </h2>
-                  <span className="font-mono text-xs text-on-surface-variant">
-                    {atRiskOrdersCount} Orders Threatening SLA Penalties
-                  </span>
-                </div>
-                <OrdersTable orders={factoryState.orders} />
-                <BlastRadiusTopology
-                  impact={pipelineResult?.impact || null}
-                  onOpenGraphModal={() => setIsGraphOpen(true)}
-                  isRecovered={Boolean(executedPlanId)}
-                />
-              </div>
-            )}
-
-            {/* TAB: Hardware Topology */}
-            {activeTab === 'hardware-health' && factoryState && (
-              <div className="flex flex-col gap-space-md">
-                <div className="flex items-center justify-between border-b border-outline-variant/30 pb-space-xs">
-                  <h2 className="font-mono text-headline-sm uppercase font-bold text-on-surface">
-                    Physical Digital Twin &amp; Hardware Cell Diagnostic Map
-                  </h2>
-                  <span className="font-mono text-xs text-on-surface-variant">
-                    Facility: {factoryState.factory_info.name}
-                  </span>
-                </div>
-                <MachineStatusGrid
-                  machines={factoryState.machines}
-                  activeDisruptedEntity={activeDisruption?.entity}
-                  onOpenAddModal={() => setIsAddMachineOpen(true)}
-                  onOpenImportModal={() => setIsImportModalOpen(true)}
-                  onStatusChange={handleMachineStatusChange}
-                  onDeleteMachine={handleDeleteMachine}
-                />
-                <ShopFloorGantt
-                  schedule={factoryState.schedule}
-                  machines={factoryState.machines}
-                  orders={factoryState.orders}
-                  activeDisruption={activeDisruption}
-                  executedPlanId={executedPlanId}
-                />
-              </div>
-            )}
-          </div>
+          {/* TAB 9: Settings */}
+          {normalizedTab === 'settings' && (
+            <SettingsPage
+              factoryState={factoryState}
+              onResetFactory={handleReset}
+              isResetting={isResetting}
+            />
+          )}
         </main>
-
-        {/* Cockpit Footer */}
-        <footer className="border-t border-outline-variant/30 bg-surface-container-low px-6 py-3 font-mono text-xs text-on-surface-variant">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-secondary animate-pulse" />
-              <span>PULSE AI-Powered Production Disruption &amp; Recovery Intelligence</span>
-            </div>
-            <div className="text-[11px] text-outline">
-              Target: CNC &amp; Precision Manufacturing • FastGraph Autonomous Engine v4.19
-            </div>
-          </div>
-        </footer>
       </div>
-
-      {/* React Flow Ripple Effect Modal */}
-      <RippleGraphModal
-        impact={pipelineResult?.impact || null}
-        isOpen={isGraphOpen}
-        onClose={() => setIsGraphOpen(false)}
-      />
 
       {/* Floating Mission Control Factory Co-Pilot Chat Drawer */}
       <FloatingCoPilotDrawer
@@ -427,11 +369,18 @@ function AppContent() {
         onImportSuccess={handleImportSuccess}
       />
 
+      {/* React Flow Blast Radius Modal */}
+      <RippleGraphModal
+        impact={pipelineResult?.impact || null}
+        isOpen={isGraphOpen}
+        onClose={() => setIsGraphOpen(false)}
+      />
+
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container-high border border-primary/50 text-on-surface shadow-2xl backdrop-blur-md animate-fade-in font-mono text-xs">
-          <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-          <span className="font-semibold text-primary">{toastMessage}</span>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-lg bg-[#0B1320] border border-[#00F2FE]/50 text-white shadow-2xl backdrop-blur-md animate-fade-in font-sans text-xs">
+          <CheckCircle2 className="h-4 w-4 text-[#00F2FE] shrink-0" />
+          <span className="font-semibold text-slate-100">{toastMessage}</span>
         </div>
       )}
     </div>

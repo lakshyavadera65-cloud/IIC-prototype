@@ -1,5 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sendChatQuery } from '../../services/api';
+import {
+  MessageSquare,
+  Send,
+  X,
+  Minus,
+  Maximize2,
+  Bot,
+  HelpCircle,
+  CheckCircle2,
+  AlertTriangle
+} from 'lucide-react';
 
 interface Message {
   id: string;
@@ -26,15 +37,15 @@ export const FloatingCoPilotDrawer: React.FC<FloatingCoPilotDrawerProps> = ({
     {
       id: 'msg-1',
       sender: 'user',
-      text: 'Why was Plan A recommended over Plan B?',
-      timestamp: '14:26 UTC',
+      text: 'Why was recovery plan Option A recommended over Option B?',
+      timestamp: '10:24 AM',
     },
     {
       id: 'msg-2',
       sender: 'assistant',
-      text: 'Plan A preserves 100% SLA compliance for Airbus #PO-9912 by utilizing an existing 3.5h idle spindle slot on CNC-03 (15:00-18:30 UTC). In comparison, Plan B forces ₹45,600 additional overtime overhead and introduces high thermal fatigue risk on Tool #4.',
-      citations: ['Ref: Telemetry CNC-03: 42% idle', 'Ref: Contract SLA Penalty Table §4.2'],
-      timestamp: '14:26 UTC',
+      text: 'Option A was recommended by the Oracle simulation engine because it preserves 100% SLA compliance for ORD-102 by utilizing redundant capacity on CNC-01 (10:15 - 12:45 UTC). Option B incurs an additional $3,850 in overtime overhead and introduces higher thermal risk.',
+      citations: ['Digital Twin: CNC-01 idle slot', 'Monte Carlo Simulation: 94% confidence'],
+      timestamp: '10:24 AM',
     },
   ]);
 
@@ -73,7 +84,7 @@ export const FloatingCoPilotDrawer: React.FC<FloatingCoPilotDrawerProps> = ({
       const errorMsg: Message = {
         id: `err-${Date.now()}`,
         sender: 'assistant',
-        text: 'Apologies, unable to query the autonomous factory intelligence backend. Please verify FastAPI is active.',
+        text: 'Unable to query the local factory intelligence backend. Please ensure the PULSE FastAPI service is online.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -92,54 +103,48 @@ export const FloatingCoPilotDrawer: React.FC<FloatingCoPilotDrawerProps> = ({
 
   return (
     <aside
-      className="fixed bottom-space-md right-space-md w-96 max-w-[calc(100vw-2rem)] bg-surface-container-low/95 backdrop-blur-md rounded shadow-2xl z-50 overflow-hidden flex flex-col border border-outline-variant/40 font-sans select-none"
+      className="fixed bottom-4 right-4 w-96 max-w-[calc(100vw-2rem)] bg-[#0B1320] border border-[#182840] rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col font-sans select-none"
       id="copilot-drawer"
     >
-      {/* Co-Pilot Header */}
-      <div className="flex items-center justify-between p-space-sm bg-surface-container border-b border-outline-variant/30">
-        <div className="flex items-center gap-space-xs">
-          <span className="w-2 h-2 rounded-full bg-primary animate-ping shrink-0" />
-          <span className="font-mono text-headline-sm text-on-surface font-bold">
-            PULSE Co-Pilot
-          </span>
-          <span className="font-mono text-mono-code text-primary bg-primary/10 px-space-2xs py-0.5 rounded text-[10px] font-bold">
-            AUTONOMOUS REASONING
-          </span>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-[#0E1726] border-b border-[#132238]">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-[#00F2FE] animate-pulse" />
+          <span className="text-xs font-bold text-white tracking-wide">Factory Intelligence Assistant</span>
         </div>
+
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => setIsMinimized((prev) => !prev)}
-            className="text-on-surface-variant hover:text-on-surface p-1 rounded hover:bg-surface-container-high transition"
-            title={isMinimized ? 'Expand Co-Pilot' : 'Minimize Co-Pilot'}
+            className="p-1 rounded text-slate-400 hover:text-white hover:bg-[#132238] transition"
+            title={isMinimized ? 'Expand' : 'Minimize'}
           >
-            <span className="material-symbols-outlined text-[18px]">
-              {isMinimized ? 'unfold_more' : 'unfold_less'}
-            </span>
+            {isMinimized ? <Maximize2 className="h-3.5 w-3.5" /> : <Minus className="h-3.5 w-3.5" />}
           </button>
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="text-on-surface-variant hover:text-on-surface p-1 rounded hover:bg-surface-container-high transition"
-              title="Close Co-Pilot Drawer"
+              className="p-1 rounded text-slate-400 hover:text-white hover:bg-[#132238] transition"
+              title="Close Assistant"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Co-Pilot Collapsible Content */}
+      {/* Body */}
       {!isMinimized && (
-        <div className="flex flex-col p-space-sm gap-space-sm max-h-[420px]">
-          {/* Grounded Conversation Log */}
-          <div className="flex flex-col gap-space-xs overflow-y-auto max-h-[260px] pr-1">
+        <div className="flex flex-col p-3 gap-3 max-h-[460px]">
+          {/* Messages Log */}
+          <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[280px] pr-1">
             {messages.map((msg) => {
               if (msg.sender === 'user') {
                 return (
                   <div key={msg.id} className="flex justify-end">
-                    <div className="bg-primary-container text-on-primary-container px-space-sm py-space-xs rounded-xl rounded-tr-none max-w-[85%] text-body-sm shadow-sm font-medium">
+                    <div className="bg-[#00F2FE]/15 border border-[#00F2FE]/30 text-white px-3 py-2 rounded-xl rounded-tr-none max-w-[85%] text-xs font-medium">
                       {msg.text}
                     </div>
                   </div>
@@ -147,21 +152,18 @@ export const FloatingCoPilotDrawer: React.FC<FloatingCoPilotDrawerProps> = ({
               }
 
               return (
-                <div key={msg.id} className="flex items-start gap-space-xs">
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1 shadow-sm">
-                    <span className="material-symbols-outlined text-on-primary text-[14px]">
-                      smart_toy
-                    </span>
+                <div key={msg.id} className="flex items-start gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-[#00F2FE]/10 text-[#00F2FE] flex items-center justify-center shrink-0 mt-0.5 border border-[#00F2FE]/20">
+                    <Bot className="h-3.5 w-3.5" />
                   </div>
-                  <div className="bg-surface-container px-space-sm py-space-xs rounded-xl rounded-tl-none max-w-[90%] text-body-sm text-on-surface flex flex-col gap-space-2xs shadow-sm border border-outline-variant/20">
+                  <div className="bg-[#0E1726] border border-[#16253D] px-3 py-2 rounded-xl rounded-tl-none max-w-[90%] text-xs text-slate-200 flex flex-col gap-1.5">
                     <p className="leading-relaxed">{msg.text}</p>
-                    {/* Citation Pills */}
                     {msg.citations && msg.citations.length > 0 && (
-                      <div className="flex flex-wrap gap-space-2xs pt-1 border-t border-outline-variant/20">
+                      <div className="flex flex-wrap gap-1 pt-1 border-t border-[#16253D]">
                         {msg.citations.map((cite, cIdx) => (
                           <span
                             key={cIdx}
-                            className="bg-surface-container-high px-space-2xs py-0.5 rounded font-mono text-[10px] text-primary border border-primary/20"
+                            className="bg-[#132238] px-1.5 py-0.5 rounded font-mono text-[9px] text-[#00F2FE] border border-[#1E3557]"
                           >
                             [{cite}]
                           </span>
@@ -173,55 +175,55 @@ export const FloatingCoPilotDrawer: React.FC<FloatingCoPilotDrawerProps> = ({
               );
             })}
             {isLoading && (
-              <div className="flex items-center gap-2 text-primary font-mono text-xs pl-8">
-                <span className="h-3.5 w-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span>Auditing agent decision tree...</span>
+              <div className="flex items-center gap-2 text-[#00F2FE] font-mono text-xs pl-8">
+                <span className="h-3 w-3 border-2 border-[#00F2FE] border-t-transparent rounded-full animate-spin" />
+                <span>Querying factory state...</span>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
 
-          {/* Quick Prompt Suggestion Chips */}
-          <div className="flex flex-col gap-space-2xs pt-space-xs border-t border-outline-variant/20">
-            <span className="font-mono text-label-caps text-on-surface-variant uppercase font-bold text-[9px]">
-              RECOMMENDED QUERIES
+          {/* Quick Query Suggestions */}
+          <div className="flex flex-col gap-1.5 pt-2 border-t border-[#132238]">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+              OPERATIONAL INQUIRIES:
             </span>
-            <div className="flex flex-wrap gap-1">
-              <button
-                type="button"
-                onClick={() => handleSend('Show CNC-03 spindle tool wear delta')}
-                className="text-left text-body-sm bg-surface-container hover:bg-surface-container-high px-2 py-1 rounded text-on-surface transition-colors truncate max-w-full text-xs border border-outline-variant/20"
-              >
-                Show CNC-03 spindle tool wear delta
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSend('Financial penalty if delayed > 2 hrs?')}
-                className="text-left text-body-sm bg-surface-container hover:bg-surface-container-high px-2 py-1 rounded text-on-surface transition-colors truncate max-w-full text-xs border border-outline-variant/20"
-              >
-                Financial penalty if delayed &gt; 2 hrs?
-              </button>
+            <div className="flex flex-col gap-1">
+              {[
+                'Which machines are currently at risk?',
+                'Why was this recovery plan recommended?',
+                'Which orders are affected by CNC-02?',
+              ].map((queryText) => (
+                <button
+                  key={queryText}
+                  type="button"
+                  onClick={() => handleSend(queryText)}
+                  className="text-left text-[11px] bg-[#0E1726] hover:bg-[#132238] px-2.5 py-1 rounded text-slate-300 hover:text-white transition border border-[#16253D] truncate"
+                >
+                  {queryText}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Prompt Input */}
-          <div className="flex items-center gap-space-xs pt-space-2xs bg-surface-container-low">
+          {/* Input Box */}
+          <div className="flex items-center gap-2 pt-1">
             <input
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isLoading}
-              className="flex-1 bg-surface-container px-space-sm py-space-xs rounded text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary border border-outline-variant/30 text-xs font-mono"
-              placeholder="Inquire agent decision audit log..."
+              className="flex-1 bg-[#0E1726] px-3 py-2 rounded-lg text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00F2FE] border border-[#182840]"
+              placeholder="Ask anything about your factory..."
             />
             <button
               type="button"
               disabled={isLoading || !inputQuery.trim()}
               onClick={() => handleSend()}
-              className="p-space-xs bg-primary text-on-primary rounded hover:bg-primary-fixed-dim transition-colors flex items-center justify-center disabled:opacity-50 active:scale-95 shrink-0"
+              className="p-2 bg-[#00F2FE] text-[#070D17] hover:bg-[#38BDF8] rounded-lg transition disabled:opacity-50 shrink-0 font-bold"
             >
-              <span className="material-symbols-outlined text-[16px]">send</span>
+              <Send className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
