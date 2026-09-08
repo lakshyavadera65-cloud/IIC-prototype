@@ -2,6 +2,7 @@ import {
   FactoryState,
   PipelineResult,
   MachineFormData,
+  ScheduleFormData,
   ImportScope,
   DuplicateStrategy,
   ImportPreviewResponse,
@@ -93,6 +94,25 @@ export async function updateMachine(machineId: string, updates: Partial<MachineF
  */
 export async function deleteMachine(machineId: string): Promise<any> {
   return request<any>(`/api/factory/machines/${encodeURIComponent(machineId)}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * Dispatch a new production schedule slot into the factory plan.
+ */
+export async function createSchedule(data: ScheduleFormData): Promise<any> {
+  return request<any>('/api/factory/schedule', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Delete a scheduled task slot.
+ */
+export async function deleteSchedule(slotId: string): Promise<any> {
+  return request<any>(`/api/factory/schedule/${encodeURIComponent(slotId)}`, {
     method: 'DELETE',
   });
 }

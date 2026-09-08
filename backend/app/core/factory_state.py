@@ -583,6 +583,64 @@ class FactoryState:
             "pulse": pulse.model_dump() if hasattr(pulse, "model_dump") else pulse
         }
 
+    def add_schedule_slot(self, slot_data: dict) -> dict:
+        """Add a new schedule slot, validate resource, and persist to custom schedule."""
+        s_id = slot_data.get("id")
+        if not s_id:
+            existing_nums = []
+            for s in self.schedule:
+                sid = s.get("id", "")
+                if sid.startswith("SCH-") and sid[4:].isdigit():
+                    existing_nums.append(int(sid[4:]))
+            next_num = max(existing_nums, default=0) + 1
+            s_id = f"SCH-{next_num:03d}"
+
+        machine_id = (slot_data.get("resource_id") or slot_data.get("machine_id") or "").strip().upper()
+        if not machine_id:
+            raise ValueError("Machine / Resource ID is required.")
+
+        start_hour = float(slot_data.get("start_hour", 0.0))
+        duration = float(slot_data.get("duration_hours", 2.0))
+        end_hour = slot_data.get("end_hour")
+        if end_hour is None or float(end_hour) <= start_hour:
+            end_hour = start_hour + max(0.5, duration)
+        else:
+            end_hour = float(end_hour)
+
+        clean_rec = {
+            "id": s_id.upper(),
+            "resource_id": machine_id,
+            "order_id": (slot_data.get("order_id") or "ORD-101").strip().upper(),
+            "operation": (slot_data.get("operation") or "CNC_MACHINING").strip(),
+            "start_hour": start_hour,
+            "end_hour": end_hour,
+            "status": slot_data.get("status", "scheduled"),
+            "operator": slot_data.get("operator", "Tech-1"),
+            "notes": slot_data.get("notes", "")
+        }
+
+        if any(s.get("id", "").upper() == clean_rec["id"] for s in self.schedule):
+            raise ValueError(f"Schedule slot '{clean_rec['id']}' already exists.")
+
+        self.custom_schedule.append(clean_rec)
+        self.schedule.append(clean_rec)
+        self._save_custom_schedule()
+        return clean_rec
+
+    def delete_schedule_slot(self, slot_id: str) -> dict:
+        """Safely delete a custom schedule slot."""
+        slot_id = slot_id.strip().upper()
+        cust_target = next((s for s in self.custom_schedule if s.get("id", "").upper() == slot_id), None)
+        if not cust_target:
+            if any(s.get("id", "").upper() == slot_id for s in self.baseline_schedule):
+                raise ValueError(f"Cannot delete baseline schedule task '{slot_id}'. Only user-added tasks may be removed.")
+            raise ValueError(f"Schedule slot '{slot_id}' not found.")
+
+        self.custom_schedule = [s for s in self.custom_schedule if s.get("id", "").upper() != slot_id]
+        self.schedule = [s for s in self.schedule if s.get("id", "").upper() != slot_id]
+        self._save_custom_schedule()
+        return {"status": "success", "message": f"Schedule task '{slot_id}' deleted successfully."}
+
     # ----------------------------------------------------
     # RESET & RESTORATION
     # ----------------------------------------------------

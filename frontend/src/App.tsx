@@ -12,6 +12,7 @@ import { DataImportPage } from './components/cockpit/DataImportPage';
 import { SettingsPage } from './components/cockpit/SettingsPage';
 
 import { AddMachineModal } from './components/cockpit/AddMachineModal';
+import { AddScheduleModal } from './components/cockpit/AddScheduleModal';
 import { ImportFactoryDataModal } from './components/cockpit/ImportFactoryDataModal';
 import { FloatingCoPilotDrawer } from './components/cockpit/FloatingCoPilotDrawer';
 import { RippleGraphModal } from './components/RippleGraphModal';
@@ -21,7 +22,7 @@ import { LoginPage } from './components/auth/LoginPage';
 import { RegisterPage } from './components/auth/RegisterPage';
 import { authService, UserProfile } from './services/authService';
 
-import { FactoryState, PipelineResult, MachineFormData } from './types';
+import { FactoryState, PipelineResult, MachineFormData, ScheduleFormData } from './types';
 import {
   fetchFactoryState,
   resetFactory,
@@ -30,6 +31,8 @@ import {
   createMachine,
   updateMachine,
   deleteMachine,
+  createSchedule,
+  deleteSchedule,
 } from './services/api';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -56,6 +59,7 @@ function AppContent() {
   const [isGraphOpen, setIsGraphOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [isAddMachineOpen, setIsAddMachineOpen] = useState<boolean>(false);
+  const [isAddScheduleOpen, setIsAddScheduleOpen] = useState<boolean>(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -181,6 +185,20 @@ function AppContent() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const handleAddSchedule = async (data: ScheduleFormData) => {
+    await createSchedule(data);
+    await loadState();
+    setToastMessage(`Schedule slot ${data.id || 'task'} allocated to workstation ${data.resource_id}.`);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleDeleteSchedule = async (slotId: string) => {
+    await deleteSchedule(slotId);
+    await loadState();
+    setToastMessage(`Schedule task ${slotId} removed from factory timeline.`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   const handleImportSuccess = async (result: any) => {
     await loadState();
     setToastMessage(result.message || 'Factory data successfully ingested into digital twin.');
@@ -271,6 +289,7 @@ function AppContent() {
               userName={currentUser?.name?.split(' ')[0] || 'Snehansh'}
               onNavigateTab={(tab) => setActiveTab(tab)}
               onOpenAddMachine={() => setIsAddMachineOpen(true)}
+              onOpenAddSchedule={() => setIsAddScheduleOpen(true)}
               onOpenImport={() => setIsImportModalOpen(true)}
               onOpenRecovery={() => setActiveTab('recovery')}
               onToggleChat={() => setIsChatOpen(true)}
@@ -300,6 +319,8 @@ function AppContent() {
               machines={factoryState?.machines || []}
               orders={factoryState?.orders || []}
               activeDisruptionCount={activeDisruption ? 1 : 0}
+              onOpenAddSchedule={() => setIsAddScheduleOpen(true)}
+              onDeleteSchedule={handleDeleteSchedule}
             />
           )}
 
@@ -360,6 +381,15 @@ function AppContent() {
         isOpen={isAddMachineOpen}
         onClose={() => setIsAddMachineOpen(false)}
         onSubmit={handleAddMachine}
+      />
+
+      {/* Add Production Schedule Slot Modal */}
+      <AddScheduleModal
+        isOpen={isAddScheduleOpen}
+        onClose={() => setIsAddScheduleOpen(false)}
+        onSubmit={handleAddSchedule}
+        machines={factoryState?.machines || []}
+        orders={factoryState?.orders || []}
       />
 
       {/* Import Factory Data Onboarding Modal */}

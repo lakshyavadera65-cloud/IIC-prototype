@@ -63,10 +63,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               <span className="text-slate-400">Location</span>
               <span className="text-slate-200">Sector 4, Precision Engineering Zone</span>
             </div>
-            <div className="flex items-center justify-between py-1.5 border-b border-[#132238]/60">
-              <span className="text-slate-400">Backend Engine</span>
-              <span className="font-mono text-[#4EDEA3]">FastAPI + Deterministic Solver v1.0.0</span>
-            </div>
             <div className="flex items-center justify-between py-1.5">
               <span className="text-slate-400">Telemetry Ingest</span>
               <span className="font-mono text-slate-200">12,400 msg/s • Active Sync</span>

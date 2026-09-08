@@ -126,6 +126,8 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ orders }) => {
                   const isAtRisk = order.status === 'at_risk';
                   const isDelayed = order.status === 'delayed';
                   const progressVal = (order as any).progress ?? (isDelayed ? 20 : isAtRisk ? 45 : 75);
+                  const dueDate = new Date(Date.now() + (order.deadline_hours || 24) * 3600000);
+                  const dueDateFormatted = dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
                   return (
                     <tr key={order.id} className="hover:bg-[#0E1726] transition">
@@ -150,8 +152,8 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ orders }) => {
                           <span className="font-mono text-[11px] text-slate-400">{progressVal}%</span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 font-mono text-slate-400 text-[11px]">
-                        {(order as any).due_date || '2025-06-12'}
+                      <td className="py-3 px-4 font-mono text-slate-300 text-[11px]">
+                        {(order as any).due_date || dueDateFormatted}
                       </td>
                       <td className="py-3 px-4 text-right">
                         <span

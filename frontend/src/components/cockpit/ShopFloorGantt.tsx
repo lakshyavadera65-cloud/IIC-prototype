@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScheduleSlot, MachineState, OrderState, DisruptionEvent } from '../../types';
 
 interface ShopFloorGanttProps {
@@ -18,6 +18,31 @@ export const ShopFloorGantt: React.FC<ShopFloorGanttProps> = ({
 }) => {
   const isCncDisrupted = Boolean(activeDisruption && activeDisruption.entity.includes('CNC-02'));
   const isPlanExecuted = Boolean(executedPlanId);
+
+  // Dynamic real-time scrubber calculation
+  const [currentRealTimeStr, setCurrentRealTimeStr] = useState<string>('');
+  const [scrubberLeftPercent, setScrubberLeftPercent] = useState<number>(54.16);
+
+  useEffect(() => {
+    const updateScrubber = () => {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const timeFormatted = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      setCurrentRealTimeStr(timeFormatted);
+
+      // Map current time to 08:00 - 19:00 window (11 hours total)
+      const decH = h + m / 60;
+      let pct = ((decH - 8) / 11) * 100;
+      if (pct < 2) pct = 2;
+      else if (pct > 96) pct = 96;
+      setScrubberLeftPercent(pct);
+    };
+
+    updateScrubber();
+    const interval = setInterval(updateScrubber, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Time axis hours: 08:00 to 19:00 (12 hours total)
   const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
@@ -153,13 +178,14 @@ export const ShopFloorGantt: React.FC<ShopFloorGanttProps> = ({
           ))}
         </div>
 
-        {/* Vertical Time Scrubber ("NOW 14:30") */}
+        {/* Vertical Real-Time Scrubber */}
         <div
-          className="absolute top-10 bottom-2 pointer-events-none z-20 flex flex-col items-center"
-          style={{ left: 'calc(11rem + 54.16%)' }}
+          className="absolute top-10 bottom-2 pointer-events-none z-20 flex flex-col items-center transition-all duration-500"
+          style={{ left: `calc(11rem + ${scrubberLeftPercent}%)` }}
         >
-          <span className="bg-error text-on-error font-mono text-[9px] px-space-2xs py-0.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.8)] uppercase font-bold">
-            NOW 14:30
+          <span className="bg-error text-on-error font-mono text-[9px] px-space-2xs py-0.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.8)] uppercase font-bold flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+            <span>NOW {currentRealTimeStr || '14:30'}</span>
           </span>
           <div className="w-px h-full bg-error shadow-[0_0_6px_rgba(239,68,68,0.9)] animate-pulse" />
         </div>

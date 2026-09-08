@@ -29,44 +29,46 @@ export const AlertsPage: React.FC<AlertsPageProps> = ({
   onNavigateToRecovery,
   isTriggering = false,
 }) => {
-  // Static history log of recent factory events
+  const currentYear = new Date().getFullYear();
+
+  // Dynamic history log of recent factory events with real-time timestamps
   const incidentHistory = [
     {
-      id: 'INC-2025-084',
+      id: `INC-${currentYear}-084`,
       severity: 'Critical',
       machine: 'CNC-02',
       issue: 'Spindle Bearing Thermal Exceedance (>95°C)',
-      time: '10:12:44 AM UTC',
+      time: '12m ago',
       impact: '3 Orders Delayed, SLA Penalty: $18,400',
       status: activeDisruption ? 'Active' : 'Resolved',
       recommendation: 'Autonomous reroute of ORD-102 to CNC-01 with 0.8mm speed step-down.',
     },
     {
-      id: 'INC-2025-083',
+      id: `INC-${currentYear}-083`,
       severity: 'Warning',
       machine: 'CELL-04',
       issue: 'Raw Material Delivery Delay: Ti-6Al-4V Billet Supply',
-      time: '09:45:12 AM UTC',
+      time: '45m ago',
       impact: 'ORD-104 buffering risk',
       status: 'Resolved',
       recommendation: 'Buffer consumption sequence modified; standby buffer allocated.',
     },
     {
-      id: 'INC-2025-082',
+      id: `INC-${currentYear}-082`,
       severity: 'Low',
       machine: 'STORAGE-BAY-A',
       issue: 'Coolant Pressure Variance on Line 3',
-      time: '08:32:05 AM UTC',
+      time: '2h ago',
       impact: 'Zero schedule deviation',
       status: 'Resolved',
       recommendation: 'Pressure valve auto-calibrated to 4.2 bar.',
     },
     {
-      id: 'INC-2025-081',
+      id: `INC-${currentYear}-081`,
       severity: 'Info',
       machine: 'CNC-01',
       issue: 'Scheduled Preventive Spindle Calibration',
-      time: '07:18:20 AM UTC',
+      time: '4h ago',
       impact: 'Routine Maintenance',
       status: 'Resolved',
       recommendation: 'Completed within scheduled window.',

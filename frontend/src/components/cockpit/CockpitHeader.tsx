@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PulseLogo } from '../branding/PulseLogo';
 import { UserProfile } from '../../services/authService';
-import { Bell, ChevronDown, Search, LogOut, RotateCcw, Play, CheckCircle2, MessageSquare } from 'lucide-react';
+import { Bell, ChevronDown, Search, LogOut, RotateCcw, Play, CheckCircle2, MessageSquare, Clock } from 'lucide-react';
 
 interface CockpitHeaderProps {
   currentUser: UserProfile | null;
@@ -32,6 +32,17 @@ export const CockpitHeader: React.FC<CockpitHeaderProps> = ({
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
   const [showSimMenu, setShowSimMenu] = useState<boolean>(false);
+  const [headerTime, setHeaderTime] = useState<string>('');
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setHeaderTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-[#070D17] border-b border-[#132238] px-6 flex items-center justify-between select-none">
@@ -177,6 +188,14 @@ export const CockpitHeader: React.FC<CockpitHeaderProps> = ({
               </span>
             )}
           </button>
+        </div>
+
+        {/* Real-time Shop Floor Clock Pill */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0B1320] border border-[#182840] shadow-sm">
+          <Clock className="h-3.5 w-3.5 text-[#00F2FE]" />
+          <span className="font-mono text-xs font-semibold text-slate-100 tracking-wide">
+            {headerTime || '--:--:--'}
+          </span>
         </div>
 
         {/* Factory Status Pill matching reference: "● Factory Online" */}

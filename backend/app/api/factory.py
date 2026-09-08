@@ -80,9 +80,39 @@ def get_orders():
     return factory_state.orders
 
 
+from app.models.schedule import ScheduleCreate
+
+
 @router.get("/schedule")
 def get_schedule():
     return factory_state.schedule
+
+
+@router.post("/schedule", status_code=status.HTTP_201_CREATED)
+def create_schedule_slot(schedule_in: ScheduleCreate):
+    """Add a new task dispatch to the factory production schedule."""
+    try:
+        new_slot = factory_state.add_schedule_slot(schedule_in.model_dump())
+        return {
+            "status": "success",
+            "message": f"Task '{new_slot['id']}' successfully scheduled on workstation '{new_slot['resource_id']}'.",
+            "schedule_slot": new_slot
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.delete("/schedule/{slot_id}")
+def delete_schedule_slot(slot_id: str):
+    """Delete a custom schedule task slot."""
+    try:
+        return factory_state.delete_schedule_slot(slot_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.post("/reset")

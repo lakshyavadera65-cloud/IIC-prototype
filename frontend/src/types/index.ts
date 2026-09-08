@@ -78,6 +78,17 @@ export interface ScheduleSlot {
   status: 'scheduled' | 'clash' | 'delayed' | 'rerouted' | 'completed';
 }
 
+export interface ScheduleFormData {
+  id?: string;
+  resource_id: string;
+  order_id: string;
+  operation: string;
+  start_hour: number;
+  duration_hours: number;
+  status?: string;
+  operator?: string;
+  notes?: string;
+}
 
 export type RootCauseCategory =
   | 'equipment_failure'

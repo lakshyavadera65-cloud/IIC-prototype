@@ -32,6 +32,7 @@ interface DashboardOverviewProps {
   onOpenImport: () => void;
   onOpenRecovery: () => void;
   onToggleChat: () => void;
+  onOpenAddSchedule?: () => void;
   activeDisruptionCount?: number;
 }
 
@@ -43,11 +44,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onOpenImport,
   onOpenRecovery,
   onToggleChat,
+  onOpenAddSchedule,
   activeDisruptionCount = 0,
 }) => {
-  // Live Date & UTC Clock matching reference: "Tue, 10 Jun 2025" and "10:24 AM UTC"
+  // Live Real-Time Date, Clock & Dynamic Greeting
   const [currentDate, setCurrentDate] = useState<string>('');
-  const [currentUtcTime, setCurrentUtcTime] = useState<string>('');
+  const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
+  const [greeting, setGreeting] = useState<string>('Good Morning');
   const [selectedMachinePin, setSelectedMachinePin] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,14 +62,22 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         month: 'short',
         year: 'numeric',
       });
-      const hours = now.getUTCHours();
-      const mins = String(now.getUTCMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const formattedHours = hours % 12 || 12;
-      const timeStr = `${formattedHours}:${mins} ${ampm} UTC`;
+      const timeStr = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
+
+      const currentHour = now.getHours();
+      let greet = 'Good Morning';
+      if (currentHour >= 12 && currentHour < 17) greet = 'Good Afternoon';
+      else if (currentHour >= 17 && currentHour < 22) greet = 'Good Evening';
+      else if (currentHour >= 22 || currentHour < 5) greet = 'Night Shift Operations';
 
       setCurrentDate(dateStr);
-      setCurrentUtcTime(timeStr);
+      setCurrentTimeStr(timeStr);
+      setGreeting(greet);
     };
 
     updateTime();
@@ -115,13 +126,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       ];
 
 
-  // Representative recent alerts matching reference image
+  // Representative recent alerts matching reference image with dynamic relative timestamps
   const recentAlerts = [
     {
       id: 'alt-1',
       title: 'CNC-02 – Fault Detected',
       desc: 'Spindle vibration above threshold',
-      time: '10:12 AM',
+      time: '8m ago',
       severity: 'high',
       badge: 'High',
       badgeColor: 'bg-[#FF5C5C]/20 text-[#FF5C5C] border border-[#FF5C5C]/30',
@@ -131,7 +142,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       id: 'alt-2',
       title: 'Order ORD-104 Delayed',
       desc: 'Expected delivery in 2 days',
-      time: '09:45 AM',
+      time: '24m ago',
       severity: 'medium',
       badge: 'Medium',
       badgeColor: 'bg-[#FFB95F]/20 text-[#FFB95F] border border-[#FFB95F]/30',
@@ -141,7 +152,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       id: 'alt-3',
       title: 'Inventory Low',
       desc: 'Aluminum stock below threshold',
-      time: '08:32 AM',
+      time: '1h ago',
       severity: 'low',
       badge: 'Low',
       badgeColor: 'bg-[#0284C7]/20 text-[#38BDF8] border border-[#0284C7]/30',
@@ -151,7 +162,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       id: 'alt-4',
       title: 'CNC-01 Back Online',
       desc: 'Maintenance completed',
-      time: '07:18 AM',
+      time: '3h ago',
       severity: 'info',
       badge: 'Info',
       badgeColor: 'bg-[#4EDEA3]/20 text-[#4EDEA3] border border-[#4EDEA3]/30',
@@ -227,22 +238,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-white font-sans mt-0.5">
-            Good Morning, {userName}
+            {greeting}, {userName}
           </h1>
           <p className="text-xs text-slate-400 font-normal">
-            Here's what's happening at your factory today.
+            Real-time digital twin telemetry and automated production dispatch.
           </p>
         </div>
 
-        {/* Right date & UTC time widget */}
-        <div className="relative z-10 hidden sm:flex flex-col items-end gap-0.5 text-right font-sans">
+        {/* Right date & live real-time clock widget */}
+        <div className="relative z-10 hidden sm:flex flex-col items-end gap-1 text-right font-sans">
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <Clock className="h-3.5 w-3.5 text-slate-400" />
-            <span>{currentDate || 'Tue, 10 Jun 2025'}</span>
+            <Clock className="h-3.5 w-3.5 text-[#00F2FE]" />
+            <span className="font-medium text-slate-300">{currentDate}</span>
           </div>
-          <span className="text-xl lg:text-2xl font-bold text-white tracking-tight">
-            {currentUtcTime || '10:24 AM UTC'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#4EDEA3] animate-pulse" />
+            <span className="text-xl lg:text-2xl font-bold font-mono text-white tracking-tight">
+              {currentTimeStr}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -696,11 +710,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           <div className="mt-2 flex flex-col gap-2 flex-1 justify-around">
+            {/* Action 0: Add Schedule */}
+            {onOpenAddSchedule && (
+              <button
+                type="button"
+                onClick={onOpenAddSchedule}
+                className="p-2.5 rounded-lg bg-[#0E1726] border border-[#16253D] hover:border-[#38BDF8]/50 hover:bg-[#132238] transition flex items-center justify-between text-left group cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-[#38BDF8]/10 text-[#38BDF8] flex items-center justify-center shrink-0">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-slate-200 group-hover:text-white">Add Schedule</div>
+                    <div className="text-[10px] text-slate-400">Dispatch work order task</div>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-slate-300 transition-transform group-hover:translate-x-0.5" />
+              </button>
+            )}
+
             {/* Action 1: Add Machine */}
             <button
               type="button"
               onClick={onOpenAddMachine}
-              className="p-2.5 rounded-lg bg-[#0E1726] border border-[#16253D] hover:border-[#00F2FE]/50 hover:bg-[#132238] transition flex items-center justify-between text-left group"
+              className="p-2.5 rounded-lg bg-[#0E1726] border border-[#16253D] hover:border-[#00F2FE]/50 hover:bg-[#132238] transition flex items-center justify-between text-left group cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-lg bg-[#00F2FE]/10 text-[#00F2FE] flex items-center justify-center shrink-0">

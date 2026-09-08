@@ -33,21 +33,24 @@ export const FloatingCoPilotDrawer: React.FC<FloatingCoPilotDrawerProps> = ({
   const [inputQuery, setInputQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'msg-1',
-      sender: 'user',
-      text: 'Why was recovery plan Option A recommended over Option B?',
-      timestamp: '10:24 AM',
-    },
-    {
-      id: 'msg-2',
-      sender: 'assistant',
-      text: 'Option A was recommended by the Oracle simulation engine because it preserves 100% SLA compliance for ORD-102 by utilizing redundant capacity on CNC-01 (10:15 - 12:45 UTC). Option B incurs an additional $3,850 in overtime overhead and introduces higher thermal risk.',
-      citations: ['Digital Twin: CNC-01 idle slot', 'Monte Carlo Simulation: 94% confidence'],
-      timestamp: '10:24 AM',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return [
+      {
+        id: 'msg-1',
+        sender: 'user',
+        text: 'Why was recovery plan Option A recommended over Option B?',
+        timestamp: timeNow,
+      },
+      {
+        id: 'msg-2',
+        sender: 'assistant',
+        text: 'Option A was recommended by the Oracle simulation engine because it preserves 100% SLA compliance for ORD-102 by utilizing redundant capacity on CNC-01. Option B incurs an additional overtime overhead and introduces higher operational risk.',
+        citations: ['Digital Twin: CNC-01 idle slot', 'Oracle Simulation: 94% confidence'],
+        timestamp: timeNow,
+      },
+    ];
+  });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
